@@ -21,6 +21,19 @@ export async function addComment(photoId: string, formData: FormData) {
     return { error: parsed.error.issues[0].message };
   }
 
+  if (parsed.data.parent_id) {
+    const { data: parentComment, error: parentError } = await supabase
+      .from("comments")
+      .select("id, photo_id")
+      .eq("id", parsed.data.parent_id)
+      .maybeSingle();
+
+    if (parentError) return { error: parentError.message };
+    if (!parentComment || parentComment.photo_id !== photoId) {
+      return { error: "回复目标不存在或已失效" };
+    }
+  }
+
   const { error } = await supabase.from("comments").insert({
     photo_id: photoId,
     user_id: user.id,
@@ -62,7 +75,13 @@ export async function likeComment(commentId: string, photoId: string) {
 
   if (!user) return { error: "请先登录" };
 
-  await supabase.rpc("increment_comment_likes", { comment_id: commentId });
+  const { data, error } = await supabase.rpc("increment_comment_likes", {
+    comment_id: commentId,
+  });
+
+  if (error) return { error: error.message };
+  if (!data) return { error: "你已经给这条评论点过赞了" };
+
   revalidatePath(`/photo/${photoId}`);
   return { success: true };
 }

@@ -15,6 +15,7 @@ export const uploadSchema = z.object({
   title: z.string().min(1, "标题不能为空").max(100, "标题最多 100 个字符"),
   description: z.string().max(500, "描述最多 500 个字符").optional(),
   is_public: z.boolean().default(true),
+  allow_download: z.boolean().default(true),
 });
 
 export const commentSchema = z.object({
@@ -26,6 +27,7 @@ export const editPhotoSchema = z.object({
   title: z.string().min(1, "标题不能为空").max(100, "标题最多 100 个字符"),
   description: z.string().max(500, "描述最多 500 个字符").optional(),
   is_public: z.boolean(),
+  allow_download: z.boolean(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

@@ -20,9 +20,11 @@ create table if not exists public.photos (
   description text,
   user_id uuid references public.profiles(id) on delete cascade not null,
   is_public boolean default true not null,
+  allow_download boolean default true not null,
   width integer default 0,
   height integer default 0,
   views integer default 0,
+  likes integer default 0,
   created_at timestamptz default now() not null
 );
 
@@ -43,6 +45,7 @@ create table if not exists public.comments (
 create index if not exists idx_photos_user_id on public.photos(user_id);
 create index if not exists idx_photos_is_public on public.photos(is_public);
 create index if not exists idx_photos_created_at on public.photos(created_at desc);
+create index if not exists idx_photos_likes on public.photos(likes desc);
 create index if not exists idx_comments_photo_id on public.comments(photo_id);
 create index if not exists idx_comments_parent_id on public.comments(parent_id);
 
@@ -113,6 +116,20 @@ end;
 $$ language plpgsql security definer;
 
 -- ============================================
+-- RPC 函数：图片点赞递增
+-- ============================================
+create or replace function public.increment_photo_likes(photo_id uuid)
+returns void as $$
+begin
+  update public.photos
+  set likes = likes + 1
+  where id = photo_id;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function public.increment_photo_likes(uuid) to anon, authenticated;
+
+-- ============================================
 -- RPC 函数：评论点赞递增
 -- ============================================
 create or replace function public.increment_comment_likes(comment_id uuid)
@@ -153,3 +170,142 @@ create trigger on_auth_user_created
 -- Realtime 启用
 -- ============================================
 alter publication supabase_realtime add table public.comments;
+
+notify pgrst, 'reload schema';
+
+-- ============================================
+-- 相册迁移
+-- ============================================
+create table if not exists public.albums (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  name text not null,
+  description text,
+  created_at timestamptz default now() not null
+);
+
+alter table public.photos
+  add column if not exists album_id uuid references public.albums(id) on delete set null;
+
+create index if not exists idx_albums_user_id on public.albums(user_id);
+create index if not exists idx_photos_album_id on public.photos(album_id);
+
+alter table public.albums enable row level security;
+
+drop policy if exists "users can view own albums" on public.albums;
+create policy "users can view own albums"
+  on public.albums for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "users can create own albums" on public.albums;
+create policy "users can create own albums"
+  on public.albums for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "users can update own albums" on public.albums;
+create policy "users can update own albums"
+  on public.albums for update
+  using (auth.uid() = user_id);
+
+drop policy if exists "users can delete own albums" on public.albums;
+create policy "users can delete own albums"
+  on public.albums for delete
+  using (auth.uid() = user_id);
+
+notify pgrst, 'reload schema';
+
+-- ============================================
+-- 点赞去重迁移：每个用户对每张图片/每条评论只能点赞一次
+-- ============================================
+create table if not exists public.photo_likes (
+  photo_id uuid references public.photos(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  created_at timestamptz default now() not null,
+  primary key (photo_id, user_id)
+);
+
+create table if not exists public.comment_likes (
+  comment_id uuid references public.comments(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  created_at timestamptz default now() not null,
+  primary key (comment_id, user_id)
+);
+
+alter table public.photo_likes enable row level security;
+alter table public.comment_likes enable row level security;
+
+drop policy if exists "photo likes are visible" on public.photo_likes;
+create policy "photo likes are visible"
+  on public.photo_likes for select
+  using (true);
+
+drop policy if exists "users can like photos once" on public.photo_likes;
+create policy "users can like photos once"
+  on public.photo_likes for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "comment likes are visible" on public.comment_likes;
+create policy "comment likes are visible"
+  on public.comment_likes for select
+  using (true);
+
+drop policy if exists "users can like comments once" on public.comment_likes;
+create policy "users can like comments once"
+  on public.comment_likes for insert
+  with check (auth.uid() = user_id);
+
+create or replace function public.increment_photo_likes(photo_id uuid)
+returns boolean as $$
+declare
+  current_user_id uuid := auth.uid();
+begin
+  if current_user_id is null then
+    raise exception 'not authenticated';
+  end if;
+
+  insert into public.photo_likes (photo_id, user_id)
+  values (photo_id, current_user_id)
+  on conflict do nothing;
+
+  if not found then
+    return false;
+  end if;
+
+  update public.photos
+  set likes = likes + 1
+  where id = photo_id;
+
+  return true;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function public.increment_photo_likes(uuid) to anon, authenticated;
+
+create or replace function public.increment_comment_likes(comment_id uuid)
+returns boolean as $$
+declare
+  current_user_id uuid := auth.uid();
+begin
+  if current_user_id is null then
+    raise exception 'not authenticated';
+  end if;
+
+  insert into public.comment_likes (comment_id, user_id)
+  values (comment_id, current_user_id)
+  on conflict do nothing;
+
+  if not found then
+    return false;
+  end if;
+
+  update public.comments
+  set likes = likes + 1
+  where id = comment_id;
+
+  return true;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function public.increment_comment_likes(uuid) to anon, authenticated;
+
+notify pgrst, 'reload schema';

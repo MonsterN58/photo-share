@@ -13,15 +13,13 @@ export function SearchBar({ className }: { className?: string }) {
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams();
       if (value.trim()) {
         params.set("q", value.trim());
-      } else {
-        params.delete("q");
       }
-      router.push(`/?${params.toString()}`);
+      router.push(`/search?${params.toString()}`);
     },
-    [value, router, searchParams]
+    [value, router]
   );
 
   return (
@@ -30,7 +28,7 @@ export function SearchBar({ className }: { className?: string }) {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         <Input
           type="text"
-          placeholder="搜索照片..."
+          placeholder="搜索照片、描述或作者..."
           value={value}
           onChange={(e) => setValue(e.target.value)}
           className="w-full pl-12 pr-4 h-12 text-base bg-gray-50 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-gray-900/5 focus:border-gray-300 transition-all placeholder:text-gray-400"

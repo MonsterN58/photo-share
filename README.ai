@@ -5,7 +5,7 @@
 ## 最后更新
 
 - **日期**: 2026-04-17
-- **更新内容**: GitHub 图床展示地址切换为 jsDelivr CDN
+- **更新内容**: 新增动态水印防拍照层，反截屏开启时在照片上叠加会话级动态水印
 
 ### 修改日志
 
@@ -18,7 +18,24 @@
 | 2026-04-17 | 登录页面增加 `Suspense` 边界包裹 `useSearchParams`（login/page.tsx） |
 | 2026-04-17 | 图片上传改为 GitHub Contents API，文件写入 GitHub 仓库并使用 raw URL 展示 |
 | 2026-04-17 | GitHub 图床展示地址改为 jsDelivr CDN，可通过 `GITHUB_IMAGE_CDN=raw` 回退 raw URL |
+| 2026-04-17 | 主页去掉 Hero/搜索区，改为全宽画廊瀑布流（3~4列 gap-2），照片按原始比例排列 |
+| 2026-04-17 | 搜索功能独立为 `/search` 页面，Navbar/Footer 增加搜索入口 |
+| 2026-04-17 | FilterBar 改为路径感知，在任何页面均可正确排序 |
+| 2026-04-17 | 修复上传表单 `startTransition` 循环未 await 导致上传后页面不刷新，改为直接 await + `router.refresh()` |
+| 2026-04-17 | 评论/点赞增加乐观更新：提交后即时显示，Realtime 事件到达后同步真实数据 |
+| 2026-04-17 | `useRealtimeComments` 新增 `addOptimistic`/`updateOptimistic` 方法 |
+| 2026-04-17 | 增加 `app/loading.tsx` 和 `app/search/loading.tsx` 路由级骨架屏，降低感知延迟 |
+| 2026-04-17 | IntersectionObserver preload margin 400px，首次加载 30 张图片 |
+| 2026-04-17 | 我的照片页删除后调用 `router.refresh()` 确保服务端数据同步 |
 | 2026-04-17 | 新增 Windows 一键启动脚本 `start-dev.cmd` / `scripts/start-dev.ps1` |
+| 2026-04-17 | 修复 `app/search/page.tsx` 尾部重复 JSX 导致的 `Return statement is not allowed here` 编译错误 |
+| 2026-04-17 | 修复 `lib/data.ts` 在 `unstable_cache` 中误用依赖 `cookies()` 的 Supabase server client；改为无状态公共 Supabase client |
+| 2026-04-17 | 适配 Next.js 16 的 `revalidateTag(tag, "max")` 签名，并在照片变更时同时失效首页与搜索缓存 |
+| 2026-04-17 | 新增 `ImageProtectionOverlay` 客户端组件，替代 Server Component 中的内联 `onContextMenu`/`onDragStart`，修复照片详情页运行时报错 |
+| 2026-04-17 | 修复 `/api/download/[id]` 中文文件名触发的 `ByteString` 500，改为 ASCII fallback + `filename*` UTF-8 编码 |
+| 2026-04-17 | 新增基于环境变量 `NEXT_PUBLIC_ANTI_SCREENSHOT_ENABLED` 的全局内容保护守卫：桌面端鼠标离开窗口时模糊，切屏/失焦时模糊 |
+| 2026-04-17 | 详情页主图升级为 `ProtectedPhotoViewer`，支持全屏查看、退出全屏，以及全屏态下继续应用图片保护与内容模糊守卫 |
+| 2026-04-17 | 新增 `DynamicWatermark` 动态水印层，反截屏开启时为卡片与详情页主图叠加带时间戳和会话标识的动态水印 |
 
 ---
 
@@ -183,6 +200,17 @@ photo-share/
 - 页面级组件尽量用 Server Components
 - 交互性组件（搜索、上传、评论、导航）使用 Client Components
 - Server Actions 处理所有数据变更
+- `unstable_cache` 内禁止访问 `cookies()`、`headers()`、`auth.getUser()` 等动态源；缓存函数只允许读取公开数据，用户态信息需在页面层单独查询后合并
+- 需要 DOM 事件、Fullscreen API、内容保护遮罩的逻辑必须落在 Client Component 中
+
+### 内容保护与反截屏
+- 图片右键、拖拽保存仍通过透明保护层拦截
+- 当 `NEXT_PUBLIC_ANTI_SCREENSHOT_ENABLED=true` 时：
+	- 桌面端鼠标离开浏览器窗口后内容会自动模糊
+	- 页面失焦、切屏、切到后台时内容会自动模糊
+	- 照片详情页全屏查看状态下同样生效
+	- 照片卡片和详情页主图会叠加动态水印，内容包含照片标题、分钟级时间戳和当前会话标识
+- 纯 Web 应用无法直接设置 Android 原生 `FLAG_SECURE`；当前实现采用浏览器可用的失焦/切屏模糊策略作为替代
 
 ### 认证
 - Supabase Auth（邮箱+密码）
@@ -200,6 +228,7 @@ photo-share/
 ```env
 NEXT_PUBLIC_SUPABASE_URL=       # Supabase 项目 URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=  # Supabase 匿名 Key
+NEXT_PUBLIC_ANTI_SCREENSHOT_ENABLED=false # 是否启用全局反截屏/内容模糊保护
 GITHUB_TOKEN=                   # GitHub Personal Access Token（需要仓库 Contents 写权限）
 GITHUB_REPO_OWNER=              # GitHub 用户名或组织名
 GITHUB_REPO_NAME=               # 用作图床的仓库名

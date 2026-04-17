@@ -6,9 +6,10 @@ import { login, register } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LoginPage() {
   return (
@@ -23,10 +24,12 @@ function LoginForm() {
   const [isRegister, setIsRegister] = useState(searchParams.get("tab") === "register");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setMessage("");
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
@@ -38,6 +41,11 @@ function LoginForm() {
         setError(result.error);
         toast.error(result.error);
       }
+
+      if (result && "message" in result && result.message) {
+        setMessage(result.message);
+        toast.success(result.message);
+      }
     });
   };
 
@@ -47,14 +55,21 @@ function LoginForm() {
         {/* Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 text-gray-900">
-            <Camera className="h-7 w-7" />
-            <span className="text-xl font-semibold tracking-tight">PhotoShare</span>
+            <Image
+              src="/nku-logo.png"
+              alt="NKU印象"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
+              priority
+            />
+            <span className="text-xl font-semibold tracking-tight">NKU印象</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-6">
             {isRegister ? "创建账号" : "欢迎回来"}
           </h1>
           <p className="text-sm text-gray-500">
-            {isRegister ? "加入 PhotoShare 社区" : "登录你的 PhotoShare 账号"}
+            {isRegister ? "加入 NKU印象社区" : "登录你的 NKU印象账号"}
           </p>
         </div>
 
@@ -111,6 +126,12 @@ function LoginForm() {
             </p>
           )}
 
+          {message && (
+            <p className="text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg">
+              {message}
+            </p>
+          )}
+
           <Button type="submit" className="w-full h-11" disabled={isPending}>
             {isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -129,6 +150,7 @@ function LoginForm() {
             onClick={() => {
               setIsRegister(!isRegister);
               setError("");
+              setMessage("");
             }}
             className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
           >

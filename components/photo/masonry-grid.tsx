@@ -2,9 +2,16 @@
 
 import { PhotoCard } from "./photo-card";
 import type { Photo } from "@/types";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+
+type ProfileSearchRow = {
+  id: string;
+};
+
+type PhotoLikeRow = {
+  photo_id: string;
+};
 
 interface MasonryGridProps {
   initialPhotos: Photo[];
@@ -13,47 +20,151 @@ interface MasonryGridProps {
   userId?: string;
 }
 
-const PAGE_SIZE = 20;
-const SKELETON_HEIGHTS = [260, 340, 300, 380];
+const PAGE_SIZE = 30;
 
-export function MasonryGrid({ initialPhotos, query, sort, userId }: MasonryGridProps) {
-  const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
+// ─── In-memory pagination cache ────────────────────────────────────────────
+// Keyed by "sort:query:userId" so each unique feed maintains its own page cache.
+const pageCache = new Map<string, { photos: Photo[]; page: number; hasMore: boolean }>();
+
+function getCacheKey(sort?: string, query?: string, userId?: string) {
+  return `${sort || "latest"}:${query || ""}:${userId || ""}`;
+}
+// ────────────────────────────────────────────────────────────────────────────
+
+function useColumnCount() {
+  const [count, setCount] = useState(0); // 0 = SSR/unmounted, measured after mount
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      if (w < 640) setCount(1);
+      else if (w < 1024) setCount(2);
+      else if (w < 1536) setCount(3);
+      else setCount(4);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return count;
+}
+
+function distributeToColumns(photos: Photo[], numColumns: number): Photo[][] {
+  if (numColumns <= 1) {
+    return [photos];
+  }
+
+  const columns: Photo[][] = Array.from({ length: numColumns }, () => []);
+  const heights = new Array(numColumns).fill(0);
+  for (const photo of photos) {
+    const ar = photo.height && photo.width ? photo.height / photo.width : 0.75;
+    let minIdx = 0;
+    for (let i = 1; i < numColumns; i++) {
+      if (heights[i] < heights[minIdx]) minIdx = i;
+    }
+    columns[minIdx].push(photo);
+    heights[minIdx] += ar;
+  }
+  return columns;
+}
+
+interface MasonryGridProps {
+  initialPhotos: Photo[];
+  query?: string;
+  sort?: string;
+  userId?: string;
+  onRefresh?: () => void;
+}
+
+export function MasonryGrid({ initialPhotos, query, sort, userId, onRefresh }: MasonryGridProps) {
+  const cacheKey = getCacheKey(sort, query, userId);
+  const cached = pageCache.get(cacheKey);
+
+  const [photos, setPhotos] = useState<Photo[]>(cached?.photos ?? initialPhotos);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(initialPhotos.length >= PAGE_SIZE);
-  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(cached !== undefined ? cached.hasMore : initialPhotos.length >= PAGE_SIZE);
+  const [page, setPage] = useState(cached?.page ?? 1);
   const observerRef = useRef<HTMLDivElement>(null);
+  const numColumns = useColumnCount();
+  const columns = useMemo(() => distributeToColumns(photos, numColumns), [photos, numColumns]);
+
+  // Keep cache in sync with state changes
+  const syncCache = useCallback((nextPhotos: Photo[], nextPage: number, nextHasMore: boolean) => {
+    pageCache.set(cacheKey, { photos: nextPhotos, page: nextPage, hasMore: nextHasMore });
+  }, [cacheKey]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
     setLoading(true);
 
     const supabase = createClient();
+    let searchFilters: string[] = [];
+    if (query) {
+      const safeQuery = query.replace(/[%_,()]/g, " ").trim();
+      const { data: matchedProfiles } = await supabase
+        .from("profiles")
+        .select("id")
+        .ilike("username", `%${safeQuery}%`);
+      const authorIds =
+        (matchedProfiles as ProfileSearchRow[] | null)?.map((profile) => profile.id).filter(Boolean) || [];
+
+      searchFilters = [
+        `title.ilike.%${safeQuery}%`,
+        `description.ilike.%${safeQuery}%`,
+        ...(authorIds.length > 0 ? [`user_id.in.(${authorIds.join(",")})`] : []),
+      ];
+    }
+
     let qb = supabase
       .from("photos")
       .select("*, profiles(*)")
       .eq("is_public", true)
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
-    if (query) {
-      qb = qb.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
+    if (searchFilters.length > 0) {
+      qb = qb.or(searchFilters.join(","));
     }
     if (userId) {
       qb = qb.eq("user_id", userId);
     }
     if (sort === "popular") {
-      qb = qb.order("views", { ascending: false });
+      qb = qb.order("likes", { ascending: false }).order("views", { ascending: false });
     } else {
       qb = qb.order("created_at", { ascending: false });
     }
 
     const { data } = await qb;
-    const newPhotos = (data as Photo[]) || [];
+    let newPhotos = (data as Photo[]) || [];
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user && newPhotos.length > 0) {
+      const { data: likedRows } = await supabase
+        .from("photo_likes")
+        .select("photo_id")
+        .eq("user_id", user.id)
+        .in(
+          "photo_id",
+          newPhotos.map((photo) => photo.id)
+        );
+      const likedIds = new Set(
+        (likedRows as PhotoLikeRow[] | null)?.map((row) => row.photo_id) || []
+      );
+      newPhotos = newPhotos.map((photo) => ({
+        ...photo,
+        has_liked: likedIds.has(photo.id),
+      }));
+    }
 
     if (newPhotos.length < PAGE_SIZE) setHasMore(false);
-    setPhotos((prev) => [...prev, ...newPhotos]);
+    setPhotos((prev) => {
+      const next = [...prev, ...newPhotos];
+      syncCache(next, page + 1, newPhotos.length >= PAGE_SIZE);
+      return next;
+    });
     setPage((p) => p + 1);
     setLoading(false);
-  }, [loading, hasMore, page, query, sort, userId]);
+  }, [loading, hasMore, page, query, sort, userId, syncCache]);
 
   useEffect(() => {
     const node = observerRef.current;
@@ -65,7 +176,7 @@ export function MasonryGrid({ initialPhotos, query, sort, userId }: MasonryGridP
           loadMore();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "400px" }
     );
 
     observer.observe(node);
@@ -85,21 +196,42 @@ export function MasonryGrid({ initialPhotos, query, sort, userId }: MasonryGridP
     );
   }
 
-  return (
-    <>
-      <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+  // numColumns === 0 means we haven't measured the client window yet (SSR / before mount).
+  // Render a single invisible placeholder to avoid hydration mismatch.
+  if (numColumns === 0) {
+    return (
+      <div className="flex flex-col">
         {photos.map((photo) => (
-          <div key={photo.id} className="break-inside-avoid">
+          <div key={photo.id} className="opacity-0">
             <PhotoCard photo={photo} />
           </div>
         ))}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex sm:gap-3 items-start">
+        {columns.map((colPhotos, colIdx) => (
+          <div key={colIdx} className="flex-1 flex flex-col sm:gap-3 min-w-0">
+            {colPhotos.map((photo) => (
+              <div key={photo.id}>
+                <PhotoCard photo={photo} />
+              </div>
+            ))}
+          </div>
+        ))}
         {loading &&
-          SKELETON_HEIGHTS.map((height, i) => (
-            <div key={`skeleton-${i}`} className="break-inside-avoid">
-              <Skeleton
-                className="w-full rounded-lg"
-                style={{ height: `${height}px` }}
-              />
+          Array.from({ length: numColumns }).map((_, colIdx) => (
+            <div key={`skel-col-${colIdx}`} className="flex-1 flex flex-col sm:gap-3 min-w-0">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={`skeleton-${colIdx}-${i}`}
+                  className="w-full sm:rounded-lg bg-gray-100 animate-pulse"
+                  style={{ height: `${160 + ((colIdx * 3 + i) % 5) * 50}px` }}
+                />
+              ))}
             </div>
           ))}
       </div>

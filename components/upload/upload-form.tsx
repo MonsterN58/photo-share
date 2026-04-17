@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useTransition, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,8 @@ interface FilePreview {
   width: number;
   height: number;
 }
+
+const RAW_UPLOAD_LIMIT = 5 * 1024 * 1024;
 
 function getImageDimensions(file: File | Blob): Promise<{ width: number; height: number }> {
   return new Promise((resolve) => {
@@ -35,11 +37,11 @@ export function UploadForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(true);
+  const [allowDownload, setAllowDownload] = useState(true);
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [, startTransition] = useTransition();
   const router = useRouter();
 
   const processFiles = useCallback(async (rawFiles: File[]) => {
@@ -52,12 +54,16 @@ export function UploadForm() {
     const previews: FilePreview[] = [];
     for (const file of imageFiles) {
       // 前端压缩
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 5,
-        maxWidthOrHeight: 3840,
-        useWebWorker: true,
-        fileType: "image/webp",
-      });
+      const compressed =
+        file.size <= RAW_UPLOAD_LIMIT
+          ? file
+          : await imageCompression(file, {
+              maxSizeMB: 12,
+              maxWidthOrHeight: 3840,
+              useWebWorker: true,
+              fileType: "image/webp",
+              initialQuality: 0.92,
+            });
 
       const dims = await getImageDimensions(compressed);
       previews.push({
@@ -111,17 +117,16 @@ export function UploadForm() {
       formData.set("title", files.length > 1 ? `${title} (${i + 1})` : title);
       formData.set("description", description);
       formData.set("is_public", String(isPublic));
+      formData.set("allow_download", String(allowDownload));
       formData.set("width", String(f.width));
       formData.set("height", String(f.height));
 
-      startTransition(async () => {
-        const result = await uploadPhoto(formData);
-        if (result.error) {
-          toast.error(`上传失败: ${result.error}`);
-        } else {
-          successCount++;
-        }
-      });
+      const result = await uploadPhoto(formData);
+      if (result.error) {
+        toast.error(`上传失败: ${result.error}`);
+      } else {
+        successCount++;
+      }
 
       setUploadProgress(Math.round(((i + 1) / files.length) * 100));
     }
@@ -132,7 +137,9 @@ export function UploadForm() {
       setFiles([]);
       setTitle("");
       setDescription("");
+      setAllowDownload(true);
       router.push("/me");
+      router.refresh();
     }
   };
 
@@ -251,6 +258,21 @@ export function UploadForm() {
           </label>
           <span className="text-xs text-gray-400">
             {isPublic ? "所有人可见" : "仅自己可见"}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={allowDownload}
+              onChange={(e) => setAllowDownload(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+            />
+            <span className="text-sm text-gray-700">允许下载</span>
+          </label>
+          <span className="text-xs text-gray-400">
+            {allowDownload ? "访客可下载 JPG 副本" : "隐藏下载入口"}
           </span>
         </div>
       </div>

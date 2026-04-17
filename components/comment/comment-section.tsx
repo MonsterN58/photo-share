@@ -6,7 +6,7 @@ import { useRealtimeComments } from "@/hooks/use-realtime-comments";
 import { addComment, deleteComment, likeComment } from "@/lib/actions/comment";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Trash2, CornerDownRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
@@ -20,34 +20,55 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ photoId, initialComments }: CommentSectionProps) {
-  const { user } = useUser();
-  const comments = useRealtimeComments(photoId, initialComments);
+  const { user, profile } = useUser();
+  const { comments, addOptimistic, removeOptimistic, updateOptimistic } =
+    useRealtimeComments(photoId, initialComments);
   const [content, setContent] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // 分离顶级评论和回复
-  const topComments = comments.filter((c) => !c.parent_id);
-  const replies = comments.filter((c) => c.parent_id);
+  const topComments = comments.filter((comment) => !comment.parent_id);
+  const replies = comments.filter((comment) => comment.parent_id);
 
   const getReplies = (commentId: string) =>
-    replies.filter((r) => r.parent_id === commentId);
+    replies.filter((reply) => reply.parent_id === commentId);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!content.trim() || !user) return;
+
+    const text = content.trim();
+    const optimisticId = `temp-${Date.now()}`;
+
+    addOptimistic({
+      id: optimisticId,
+      photo_id: photoId,
+      user_id: user.id,
+      content: text,
+      parent_id: replyTo,
+      likes: 0,
+      created_at: new Date().toISOString(),
+      profiles: {
+        id: user.id,
+        username: profile?.username || user.user_metadata?.username || "我",
+        avatar_url: profile?.avatar_url || null,
+        bio: profile?.bio || null,
+        created_at: profile?.created_at || new Date().toISOString(),
+      },
+    });
+
+    setContent("");
+    setReplyTo(null);
 
     const formData = new FormData();
-    formData.set("content", content.trim());
+    formData.set("content", text);
     if (replyTo) formData.set("parent_id", replyTo);
 
     startTransition(async () => {
       const result = await addComment(photoId, formData);
       if (result.error) {
+        removeOptimistic(optimisticId);
         toast.error(result.error);
-      } else {
-        setContent("");
-        setReplyTo(null);
       }
     });
   };
@@ -61,7 +82,6 @@ export function CommentSection({ photoId, initialComments }: CommentSectionProps
         </h3>
       </div>
 
-      {/* 评论输入 */}
       {user ? (
         <form onSubmit={handleSubmit} className="space-y-3">
           {replyTo && (
@@ -79,14 +99,14 @@ export function CommentSection({ photoId, initialComments }: CommentSectionProps
           )}
           <Textarea
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(event) => setContent(event.target.value)}
             placeholder="写下你的评论..."
             rows={3}
             className="resize-none bg-gray-50 border-gray-200 focus:bg-white"
           />
           <div className="flex justify-end">
             <Button type="submit" size="sm" disabled={isPending || !content.trim()}>
-              {isPending ? "发送中..." : "发表评论"}
+              {isPending ? "发送中..." : replyTo ? "发送回复" : "发表评论"}
             </Button>
           </div>
         </form>
@@ -101,7 +121,6 @@ export function CommentSection({ photoId, initialComments }: CommentSectionProps
         </div>
       )}
 
-      {/* 评论列表 */}
       <div className="space-y-4">
         {topComments.map((comment) => (
           <CommentItem
@@ -111,6 +130,19 @@ export function CommentSection({ photoId, initialComments }: CommentSectionProps
             photoId={photoId}
             userId={user?.id}
             onReply={() => setReplyTo(comment.id)}
+            onOptimisticLike={(id) =>
+              updateOptimistic(id, {
+                likes: (comments.find((current) => current.id === id)?.likes ?? 0) + 1,
+              })
+            }
+            onOptimisticUnlike={(id) =>
+              updateOptimistic(id, {
+                likes: Math.max(
+                  0,
+                  (comments.find((current) => current.id === id)?.likes ?? 1) - 1
+                ),
+              })
+            }
           />
         ))}
       </div>
@@ -130,14 +162,19 @@ function CommentItem({
   photoId,
   userId,
   onReply,
+  onOptimisticLike,
+  onOptimisticUnlike,
 }: {
   comment: Comment;
   replies: Comment[];
   photoId: string;
   userId?: string;
   onReply: () => void;
+  onOptimisticLike: (commentId: string) => void;
+  onOptimisticUnlike: (commentId: string) => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const isOptimistic = comment.id.startsWith("temp-");
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -147,16 +184,26 @@ function CommentItem({
   };
 
   const handleLike = () => {
+    onOptimisticLike(comment.id);
     startTransition(async () => {
       const result = await likeComment(comment.id, photoId);
-      if (result.error) toast.error(result.error);
+      if (result.error) {
+        onOptimisticUnlike(comment.id);
+        toast.error(result.error);
+      }
     });
   };
 
   return (
     <div className="space-y-3">
       <div className="flex gap-3">
-        <Avatar className="h-8 w-8 shrink-0">
+        <Avatar className="h-8 w-8 shrink-0 overflow-hidden">
+          {comment.profiles?.avatar_url ? (
+            <AvatarImage
+              src={comment.profiles.avatar_url}
+              alt={comment.profiles?.username || "头像"}
+            />
+          ) : null}
           <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">
             {(comment.profiles?.username || "U").charAt(0).toUpperCase()}
           </AvatarFallback>
@@ -178,24 +225,28 @@ function CommentItem({
           </p>
           <div className="flex items-center gap-3 mt-2">
             <button
+              type="button"
               onClick={handleLike}
-              disabled={isPending}
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors"
+              disabled={isPending || isOptimistic}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
             >
               <Heart className="h-3.5 w-3.5" />
               {comment.likes > 0 && <span>{comment.likes}</span>}
             </button>
             <button
+              type="button"
               onClick={onReply}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              disabled={isOptimistic}
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
             >
               回复
             </button>
             {userId === comment.user_id && (
               <button
+                type="button"
                 onClick={handleDelete}
-                disabled={isPending}
-                className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                disabled={isPending || isOptimistic}
+                className="text-xs text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -204,12 +255,17 @@ function CommentItem({
         </div>
       </div>
 
-      {/* 回复 */}
       {replies.length > 0 && (
         <div className="ml-11 space-y-3 border-l-2 border-gray-100 pl-4">
           {replies.map((reply) => (
             <div key={reply.id} className="flex gap-3">
-              <Avatar className="h-6 w-6 shrink-0">
+              <Avatar className="h-6 w-6 shrink-0 overflow-hidden">
+                {reply.profiles?.avatar_url ? (
+                  <AvatarImage
+                    src={reply.profiles.avatar_url}
+                    alt={reply.profiles?.username || "头像"}
+                  />
+                ) : null}
                 <AvatarFallback className="bg-gray-100 text-gray-600 text-[10px]">
                   {(reply.profiles?.username || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>

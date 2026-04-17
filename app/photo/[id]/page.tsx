@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { CommentSection } from "@/components/comment/comment-section";
+import { ProtectedPhotoViewer } from "@/components/photo/protected-photo-viewer";
 import { ShareButton } from "@/components/photo/share-button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Eye } from "lucide-react";
+import { PhotoActions } from "@/components/photo/photo-actions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { siteConfig } from "@/lib/site-config";
+import { Eye, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Photo, Comment } from "@/types";
@@ -18,10 +20,15 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const supabase = await createClient();
-  const { data } = await supabase.from("photos").select("title, description").eq("id", id).single();
+  const { data } = await supabase
+    .from("photos")
+    .select("title, description")
+    .eq("id", id)
+    .single();
+
   return {
-    title: data?.title ? `${data.title} - PhotoShare` : "PhotoShare",
-    description: data?.description || "一个优雅的照片分享社区",
+    title: data?.title ? `${data.title} - NKU印象` : "NKU印象",
+    description: data?.description || "记录与分享南开校园印象",
   };
 }
 
@@ -39,7 +46,19 @@ export default async function PhotoDetailPage({ params }: Props) {
 
   const typedPhoto = photo as Photo;
 
-  // 获取评论
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let hasLiked = false;
+  if (user) {
+    const { data: likeRow } = await supabase
+      .from("photo_likes")
+      .select("photo_id")
+      .eq("photo_id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    hasLiked = !!likeRow;
+  }
+
   const { data: comments } = await supabase
     .from("comments")
     .select("*, profiles(*)")
@@ -51,87 +70,86 @@ export default async function PhotoDetailPage({ params }: Props) {
   return (
     <>
       <PhotoDetailClient photoId={id} />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 大图展示 */}
-          <div className="lg:col-span-2">
-            <div className="relative rounded-xl overflow-hidden bg-gray-100">
-              <div
-                style={{
-                  paddingBottom: `${
-                    typedPhoto.height && typedPhoto.width
-                      ? (typedPhoto.height / typedPhoto.width) * 100
-                      : 66.67
-                  }%`,
-                }}
-                className="relative"
-              >
-                <Image
-                  src={typedPhoto.url}
-                  alt={typedPhoto.title}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 1024px) 100vw, 66vw"
-                  priority
-                />
-              </div>
-            </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+          {/* 左侧图片区域 */}
+          <div className="lg:col-span-3">
+            <ProtectedPhotoViewer
+              url={typedPhoto.url}
+              title={typedPhoto.title}
+              width={typedPhoto.width}
+              height={typedPhoto.height}
+              antiScreenshotEnabled={siteConfig.antiScreenshotEnabled}
+            />
           </div>
 
-          {/* 元信息 */}
-          <div className="space-y-6">
+          {/* 右侧信息区域 */}
+          <div className="lg:col-span-2 space-y-5">
             {/* 作者 */}
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
+              <Avatar className="h-10 w-10 overflow-hidden">
+                {typedPhoto.profiles?.avatar_url ? (
+                  <AvatarImage
+                    src={typedPhoto.profiles.avatar_url}
+                    alt={typedPhoto.profiles?.username || "头像"}
+                  />
+                ) : null}
                 <AvatarFallback className="bg-gray-900 text-white text-sm">
                   {(typedPhoto.profiles?.username || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-semibold text-gray-900">
                   {typedPhoto.profiles?.username || "匿名用户"}
                 </p>
-                <p className="text-xs text-gray-400">摄影师</p>
+                <p className="text-xs text-gray-400">
+                  {formatDistanceToNow(new Date(typedPhoto.created_at), {
+                    addSuffix: true,
+                    locale: zhCN,
+                  })}
+                </p>
               </div>
             </div>
 
-            {/* 标题和描述 */}
+            {/* 标题描述 */}
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900 leading-snug">
                 {typedPhoto.title}
               </h1>
               {typedPhoto.description && (
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-500 leading-relaxed">
                   {typedPhoto.description}
                 </p>
               )}
             </div>
 
-            {/* 元数据 */}
-            <div className="flex items-center gap-4 text-sm text-gray-400">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {formatDistanceToNow(new Date(typedPhoto.created_at), {
-                    addSuffix: true,
-                    locale: zhCN,
-                  })}
-                </span>
-              </div>
+            {/* 数据统计 */}
+            <div className="flex items-center gap-5 text-sm text-gray-400 border-y border-gray-100 py-4">
               <div className="flex items-center gap-1.5">
                 <Eye className="h-4 w-4" />
-                <span>{typedPhoto.views} 次浏览</span>
+                <span>{typedPhoto.views} 浏览</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Heart className="h-4 w-4" />
+                <span>{typedPhoto.likes || 0} 点赞</span>
               </div>
             </div>
 
-            {/* 分享 */}
-            <div className="flex gap-2">
+            {/* 操作按钮 */}
+            <div className="flex flex-wrap gap-2">
+              <PhotoActions
+                photoId={id}
+                title={typedPhoto.title}
+                likes={typedPhoto.likes || 0}
+                allowDownload={typedPhoto.allow_download !== false}
+                hasLiked={hasLiked}
+              />
               <ShareButton photoId={id} title={typedPhoto.title} />
             </div>
 
             <div className="border-t border-gray-100" />
 
-            {/* 评论区 */}
+            {/* 评论 */}
             <CommentSection photoId={id} initialComments={typedComments} />
           </div>
         </div>

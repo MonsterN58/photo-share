@@ -4,14 +4,28 @@ export interface Photo {
   title: string;
   description: string | null;
   user_id: string;
+  album_id: string | null;
   is_public: boolean;
+  allow_download: boolean;
   width: number;
   height: number;
   views: number;
+  likes: number;
   created_at: string;
   // joined
   profiles?: Profile;
+  albums?: Album | null;
   comment_count?: number;
+  has_liked?: boolean;
+}
+
+export interface Album {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  photo_count?: number;
 }
 
 export interface Comment {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 const SORT_OPTIONS = [
   { value: "latest", label: "最新" },
@@ -11,16 +11,17 @@ const SORT_OPTIONS = [
 export function FilterBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const currentSort = searchParams.get("sort") || "latest";
 
   const handleSort = (sort: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort", sort);
-    router.push(`/?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center bg-gray-50 rounded-full p-0.5 gap-0.5">
       {SORT_OPTIONS.map((opt) => (
         <Button
           key={opt.value}
@@ -29,8 +30,8 @@ export function FilterBar() {
           onClick={() => handleSort(opt.value)}
           className={
             currentSort === opt.value
-              ? "text-sm"
-              : "text-sm text-gray-500 hover:text-gray-900"
+              ? "text-xs h-8 rounded-full shadow-sm"
+              : "text-xs h-8 rounded-full text-gray-500 hover:text-gray-900 hover:bg-white"
           }
         >
           {opt.label}

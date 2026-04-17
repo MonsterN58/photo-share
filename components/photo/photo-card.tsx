@@ -2,79 +2,209 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Share2, ExternalLink } from "lucide-react";
 import type { Photo } from "@/types";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { Download, Heart, Loader2 } from "lucide-react";
+import { DynamicWatermark } from "@/components/photo/dynamic-watermark";
+import { ImageProtectionOverlay } from "@/components/photo/image-protection-overlay";
+import { Button } from "@/components/ui/button";
+import { likePhoto } from "@/lib/actions/photo";
+import { downloadImageAsJpeg } from "@/lib/download-image";
+import { siteConfig } from "@/lib/site-config";
+import { toast } from "sonner";
 
 interface PhotoCardProps {
   photo: Photo;
 }
 
+function MiniAvatar({
+  username,
+  avatarUrl,
+  size = 28,
+}: {
+  username: string;
+  avatarUrl?: string | null;
+  size?: number;
+}) {
+  return (
+    <div
+      className="rounded-full overflow-hidden bg-gray-700 shrink-0 ring-1 ring-white/30 flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      {avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={avatarUrl}
+          alt={username}
+          width={size}
+          height={size}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <span className="text-white font-semibold" style={{ fontSize: size * 0.4 }}>
+          {username.charAt(0).toUpperCase()}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function PhotoCard({ photo }: PhotoCardProps) {
   const [loaded, setLoaded] = useState(false);
-  const aspectRatio = photo.height && photo.width ? photo.height / photo.width : 0.75;
+  const [likes, setLikes] = useState(photo.likes || 0);
+  const [liked, setLiked] = useState(() => Boolean(photo.has_liked));
+  const [likeAnimating, setLikeAnimating] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const aspectRatio =
+    photo.height && photo.width ? photo.height / photo.width : 0.75;
+
+  const username = photo.profiles?.username || "匿名";
+  const avatarUrl = photo.profiles?.avatar_url;
+
+  const handleLike = () => {
+    if (liked) {
+      toast.info("你已经给这张照片点过赞了");
+      return;
+    }
+    setLikes((value) => value + 1);
+    setLiked(true);
+    setLikeAnimating(true);
+    setTimeout(() => setLikeAnimating(false), 500);
+    startTransition(async () => {
+      const result = await likePhoto(photo.id);
+      if (result.error) {
+        setLikes((value) => Math.max(0, value - 1));
+        setLiked(false);
+        toast.error(result.error);
+      }
+    });
+  };
+
+  const handleDownload = async () => {
+    try {
+      setDownloading(true);
+      await downloadImageAsJpeg(photo.id, photo.title);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "下载失败");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
-    <div className="group relative rounded-lg overflow-hidden bg-gray-100">
-      <Link href={`/photo/${photo.id}`}>
-        <div
-          style={{ paddingBottom: `${aspectRatio * 100}%` }}
-          className="relative w-full"
-        >
-          <Image
-            src={photo.url}
-            alt={photo.title}
-            fill
-            className={`object-cover transition-all duration-500 group-hover:scale-[1.02] ${
-              loaded ? "opacity-100" : "opacity-0"
-            }`}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            onLoad={() => setLoaded(true)}
-          />
-          {!loaded && (
-            <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+    <article className="group/card bg-white sm:bg-transparent overflow-hidden sm:rounded-xl">
+      <div className="flex items-center gap-2.5 px-3 py-2 sm:hidden">
+        <MiniAvatar username={username} avatarUrl={avatarUrl} size={30} />
+        <span className="text-sm font-medium text-gray-900 truncate">{username}</span>
+      </div>
+
+      <div className="relative overflow-hidden bg-gray-100 sm:rounded-xl">
+        <Link href={`/photo/${photo.id}`} className="block">
+          <div
+            style={{ paddingBottom: `${aspectRatio * 100}%` }}
+            className="relative w-full"
+          >
+            <Image
+              src={photo.url}
+              alt={photo.title}
+              fill
+              className={`object-cover transition-all duration-500 group-hover/card:scale-[1.03] photo-protected ${
+                loaded ? "opacity-100" : "opacity-0"
+              }`}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+              onLoad={() => setLoaded(true)}
+              draggable={false}
+            />
+            <ImageProtectionOverlay />
+            {siteConfig.antiScreenshotEnabled && <DynamicWatermark title={photo.title} />}
+            {!loaded && (
+              <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+            )}
+          </div>
+        </Link>
+
+        <div className="hidden sm:block">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+          <div className="absolute left-2 top-2 flex gap-2 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 transition-opacity duration-300">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className={`h-8 hover:bg-white ${liked ? "bg-red-500 text-white hover:bg-red-600" : "bg-white/90 text-gray-900"} ${likeAnimating ? "animate-like-burst" : ""}`}
+              onClick={handleLike}
+              disabled={isPending}
+            >
+              <Heart className={`h-3.5 w-3.5 transition-all ${liked ? "fill-current" : ""} ${likeAnimating ? "animate-like-pop" : ""}`} />
+              {likes}
+            </Button>
+          </div>
+
+          {photo.allow_download !== false && (
+            <div className="absolute right-2 top-2 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 transition-opacity duration-300">
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-8 w-8 bg-white/90 text-gray-900 hover:bg-white"
+                onClick={handleDownload}
+                disabled={downloading}
+                aria-label="下载图片"
+              >
+                {downloading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Download className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            </div>
+          )}
+
+          <div className="absolute bottom-0 left-0 right-0 p-3 text-white translate-y-1 opacity-0 group-hover/card:translate-y-0 group-hover/card:opacity-100 group-focus-within/card:translate-y-0 group-focus-within/card:opacity-100 transition-all duration-300 pointer-events-none">
+            <div className="flex items-center gap-2">
+              <MiniAvatar username={username} avatarUrl={avatarUrl} size={26} />
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate leading-tight">{photo.title}</p>
+                <p className="text-xs text-white/70 truncate">{username}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="sm:hidden flex items-center justify-between gap-2 px-3 py-2.5 border-b border-gray-50">
+        <p className="text-sm text-gray-800 truncate flex-1 font-medium">{photo.title}</p>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={`h-8 gap-1 px-2.5 rounded-full transition-colors ${liked ? "text-red-500 bg-red-50" : "text-gray-500 hover:bg-gray-100"}`}
+            onClick={handleLike}
+            disabled={isPending}
+          >
+            <Heart className={`h-4 w-4 transition-all ${liked ? "fill-current" : ""} ${likeAnimating ? "animate-like-pop" : ""}`} />
+            <span className="text-xs tabular-nums">{likes}</span>
+          </Button>
+          {photo.allow_download !== false && (
+            <Button
+              type="button"
+              size="sm"
+              className="h-8 rounded-full bg-gray-900 text-white hover:bg-gray-700 gap-1.5 px-3.5 text-xs shadow-sm"
+              onClick={handleDownload}
+              disabled={downloading}
+            >
+              {downloading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )}
+              下载
+            </Button>
           )}
         </div>
-
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Bottom info */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-          <p className="text-sm font-medium truncate">{photo.title}</p>
-          <p className="text-xs text-white/80 mt-0.5">
-            {photo.profiles?.username || "匿名用户"}
-          </p>
-        </div>
-
-        {/* Top-right actions */}
-        <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              navigator.clipboard.writeText(
-                `${window.location.origin}/photo/${photo.id}`
-              );
-            }}
-            className="p-1.5 bg-white/90 backdrop-blur-sm rounded-md hover:bg-white transition-colors shadow-sm"
-            title="分享"
-          >
-            <Share2 className="h-3.5 w-3.5 text-gray-700" />
-          </button>
-          <span className="p-1.5 bg-white/90 backdrop-blur-sm rounded-md shadow-sm">
-            <ExternalLink className="h-3.5 w-3.5 text-gray-700" />
-          </span>
-        </div>
-
-        {/* Views */}
-        {photo.views > 0 && (
-          <div className="absolute top-3 left-3 flex items-center gap-1 text-xs text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Eye className="h-3.5 w-3.5" />
-            <span>{photo.views}</span>
-          </div>
-        )}
-      </Link>
-    </div>
+      </div>
+    </article>
   );
 }

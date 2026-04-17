@@ -1,11 +1,28 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { Comment } from "@/types";
 
 export function useRealtimeComments(photoId: string, initialComments: Comment[]) {
   const [comments, setComments] = useState<Comment[]>(() => initialComments);
+
+  const addOptimistic = useCallback((comment: Comment) => {
+    setComments((prev) => [...prev, comment]);
+  }, []);
+
+  const removeOptimistic = useCallback((commentId: string) => {
+    setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+  }, []);
+
+  const updateOptimistic = useCallback(
+    (commentId: string, updates: Partial<Comment>) => {
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, ...updates } : c))
+      );
+    },
+    []
+  );
 
   useEffect(() => {
     const supabase = createClient();
@@ -21,7 +38,6 @@ export function useRealtimeComments(photoId: string, initialComments: Comment[])
           filter: `photo_id=eq.${photoId}`,
         },
         async () => {
-          // 重新获取所有评论（包含 profile 信息）
           const { data } = await supabase
             .from("comments")
             .select("*, profiles(*)")
@@ -40,5 +56,5 @@ export function useRealtimeComments(photoId: string, initialComments: Comment[])
     };
   }, [photoId]);
 
-  return comments;
+  return { comments, addOptimistic, removeOptimistic, updateOptimistic };
 }

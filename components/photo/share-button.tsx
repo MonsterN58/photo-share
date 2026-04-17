@@ -1,6 +1,9 @@
 "use client";
 
-import { Share2, Link as LinkIcon, QrCode } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import QRCode from "qrcode";
+import { Link as LinkIcon, QrCode, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,16 +12,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { useEffect, useRef, useState } from "react";
-import QRCode from "qrcode";
 
 interface ShareButtonProps {
   photoId: string;
   title: string;
+  variant?: "default" | "outline" | "ghost";
+  size?: "default" | "sm" | "icon";
+  className?: string;
+  iconOnly?: boolean;
 }
 
-export function ShareButton({ photoId, title }: ShareButtonProps) {
+export function ShareButton({
+  photoId,
+  title,
+  variant = "outline",
+  size = "sm",
+  className,
+  iconOnly = false,
+}: ShareButtonProps) {
   const [open, setOpen] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shareUrl =
@@ -43,23 +54,31 @@ export function ShareButton({ photoId, title }: ShareButtonProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="sm" className="gap-1.5" />}>
-          <Share2 className="h-4 w-4" />
-          分享
+      <DialogTrigger
+        render={
+          <Button
+            variant={variant}
+            size={size}
+            className={className}
+            aria-label="分享照片"
+          />
+        }
+      >
+        <Share2 className="h-4 w-4" />
+        {!iconOnly && "分享"}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>分享照片</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <p className="text-sm text-gray-500 truncate">{title}</p>
+          <p className="truncate text-sm text-gray-500">{title}</p>
 
-          {/* 复制链接 */}
           <div className="flex items-center gap-2">
             <input
               readOnly
               value={shareUrl}
-              className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-600"
+              className="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600"
             />
             <Button size="sm" onClick={copyLink} className="gap-1.5 shrink-0">
               <LinkIcon className="h-4 w-4" />
@@ -67,7 +86,6 @@ export function ShareButton({ photoId, title }: ShareButtonProps) {
             </Button>
           </div>
 
-          {/* 二维码 */}
           <div className="flex flex-col items-center gap-3 pt-2">
             <div className="flex items-center gap-1.5 text-sm text-gray-500">
               <QrCode className="h-4 w-4" />

@@ -129,3 +129,72 @@
     @apply font-sans;
   }
 }
+
+/* ── Photo protection ──────────────────────────────────────────────────── */
+/* Prevent right-click context menu and drag-to-save on all photo images */
+img.photo-protected {
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none; /* overlay div captures events instead */
+}
+/* ──────────────────────────────────────────────────────────────────────── */
+
+/* Like heart animation */
+@keyframes like-pop {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.35); }
+  30% { transform: scale(0.9); }
+  45% { transform: scale(1.15); }
+  60% { transform: scale(0.95); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes like-burst {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.animate-like-pop {
+  animation: like-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.animate-like-burst {
+  animation: like-burst 0.5s ease-out;
+}
+
+@keyframes watermark-drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-18deg);
+  }
+  50% {
+    transform: translate3d(10px, -8px, 0) rotate(-16deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-18deg);
+  }
+}
+
+@keyframes watermark-breathe {
+  0% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0.42;
+  }
+}
+
+.watermark-layer {
+  transform: rotate(-18deg);
+}
+
+.watermark-tile {
+  animation:
+    watermark-drift 9s ease-in-out infinite,
+    watermark-breathe 4.8s ease-in-out infinite;
+  will-change: transform, opacity;
+}
