@@ -75,7 +75,7 @@ interface MasonryGridProps {
   onRefresh?: () => void;
 }
 
-export function MasonryGrid({ initialPhotos, query, sort, userId, onRefresh }: MasonryGridProps) {
+export function MasonryGrid({ initialPhotos, query, sort, userId }: MasonryGridProps) {
   const cacheKey = getCacheKey(sort, query, userId);
   const cached = pageCache.get(cacheKey);
 
@@ -203,7 +203,7 @@ export function MasonryGrid({ initialPhotos, query, sort, userId, onRefresh }: M
       <div className="flex flex-col">
         {photos.map((photo) => (
           <div key={photo.id} className="opacity-0">
-            <PhotoCard photo={photo} />
+            <PhotoCard photo={photo} trackViews={false} />
           </div>
         ))}
       </div>

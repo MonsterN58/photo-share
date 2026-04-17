@@ -3,19 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Photo } from "@/types";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Download, Heart, Loader2 } from "lucide-react";
 import { DynamicWatermark } from "@/components/photo/dynamic-watermark";
 import { ImageProtectionOverlay } from "@/components/photo/image-protection-overlay";
 import { Button } from "@/components/ui/button";
-import { likePhoto } from "@/lib/actions/photo";
+import { incrementViews, likePhoto } from "@/lib/actions/photo";
 import { downloadImageAsJpeg } from "@/lib/download-image";
 import { siteConfig } from "@/lib/site-config";
 import { toast } from "sonner";
 
 interface PhotoCardProps {
   photo: Photo;
+  trackViews?: boolean;
 }
+
+const viewedPhotoIds = new Set<string>();
 
 function MiniAvatar({
   username,
@@ -49,7 +52,8 @@ function MiniAvatar({
   );
 }
 
-export function PhotoCard({ photo }: PhotoCardProps) {
+export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
+  const cardRef = useRef<HTMLElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [likes, setLikes] = useState(photo.likes || 0);
   const [liked, setLiked] = useState(() => Boolean(photo.has_liked));
@@ -61,6 +65,30 @@ export function PhotoCard({ photo }: PhotoCardProps) {
 
   const username = photo.profiles?.username || "匿名";
   const avatarUrl = photo.profiles?.avatar_url;
+
+  useEffect(() => {
+    if (!trackViews || viewedPhotoIds.has(photo.id)) {
+      return;
+    }
+
+    const node = cardRef.current;
+    if (!node) {
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) {
+        return;
+      }
+
+      viewedPhotoIds.add(photo.id);
+      observer.disconnect();
+      void incrementViews(photo.id);
+    });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [photo.id, trackViews]);
 
   const handleLike = () => {
     if (liked) {
@@ -93,7 +121,7 @@ export function PhotoCard({ photo }: PhotoCardProps) {
   };
 
   return (
-    <article className="group/card bg-white sm:bg-transparent overflow-hidden sm:rounded-xl">
+    <article ref={cardRef} className="group/card bg-white sm:bg-transparent overflow-hidden sm:rounded-xl">
       <div className="flex items-center gap-2.5 px-3 py-2 sm:hidden">
         <MiniAvatar username={username} avatarUrl={avatarUrl} size={30} />
         <span className="text-sm font-medium text-gray-900 truncate">{username}</span>
@@ -127,7 +155,7 @@ export function PhotoCard({ photo }: PhotoCardProps) {
         <div className="hidden sm:block">
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-          <div className="absolute left-2 top-2 flex gap-2 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 transition-opacity duration-300">
+          <div className="absolute left-2 top-2 z-[2] flex gap-2 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 transition-opacity duration-300">
             <Button
               type="button"
               variant="secondary"
@@ -142,7 +170,7 @@ export function PhotoCard({ photo }: PhotoCardProps) {
           </div>
 
           {photo.allow_download !== false && (
-            <div className="absolute right-2 top-2 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 transition-opacity duration-300">
+            <div className="absolute right-2 top-2 z-[2] opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 transition-opacity duration-300">
               <Button
                 type="button"
                 variant="secondary"
