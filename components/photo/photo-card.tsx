@@ -76,6 +76,13 @@ export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
       return;
     }
 
+    // Fallback for browsers without IntersectionObserver (e.g. older WebView)
+    if (typeof IntersectionObserver === "undefined") {
+      viewedPhotoIds.add(photo.id);
+      void incrementViews(photo.id);
+      return;
+    }
+
     const observer = new IntersectionObserver((entries) => {
       if (!entries.some((entry) => entry.isIntersecting)) {
         return;

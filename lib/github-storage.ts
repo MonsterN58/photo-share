@@ -1,10 +1,12 @@
-const GITHUB_API_BASE = "https://api.github.com";
+const GITHUB_API_BASE = process.env.GITHUB_API_PROXY?.trim() || "https://api.github.com";
 const DEFAULT_BRANCH = "main";
 const DEFAULT_IMAGE_DIR = "uploads";
 const INITIAL_REPO = "picture";
 const REPO_SIZE_LIMIT_KB = 3 * 1024 * 1024; // 3 GB（单位 KB，GitHub API 返回 KB）
 const MAX_REPO_COUNT = 100;
 const REPO_CACHE_TTL_MS = 30 * 60 * 1000; // 30 分钟重检一次
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
 
 let activeRepoCache: { repo: string; checkedAt: number } | null = null;
 
@@ -70,12 +72,53 @@ interface GitHubRepoInfo {
   default_branch: string;
 }
 
+/**
+ * 带重试的 fetch 封装，兼容不挂代理时网络不稳定的情况。
+ * 对网络错误和 5xx 错误进行重试，每次等待时间递增。
+ */
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit,
+  retries = MAX_RETRIES
+): Promise<Response> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const fetchOptions: RequestInit = { ...init };
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      // AbortController may not exist in very old Node environments
+      if (typeof AbortController !== "undefined") {
+        const controller = new AbortController();
+        timeout = setTimeout(() => controller.abort(), 30_000);
+        fetchOptions.signal = controller.signal;
+      }
+      const response = await fetch(url, fetchOptions);
+      if (timeout) clearTimeout(timeout);
+      // 5xx 服务端错误时重试
+      if (response.status >= 500 && attempt < retries) {
+        await new Promise<void>((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+        continue;
+      }
+      return response;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt < retries) {
+        await new Promise<void>((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+      }
+    }
+  }
+  throw new Error(
+    `GitHub API 请求失败（已重试 ${retries} 次）: ${lastError?.message || "未知错误"}。` +
+    `如果你没有使用代理，可以在 .env.local 中设置 GITHUB_API_PROXY 为 GitHub API 镜像地址。`
+  );
+}
+
 async function getRepoInfo(
   owner: string,
   repo: string,
   token: string
 ): Promise<GitHubRepoInfo | null> {
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
     {
       headers: {
@@ -94,7 +137,7 @@ async function getRepoInfo(
 }
 
 async function createRepo(repoName: string, token: string): Promise<void> {
-  const response = await fetch(`${GITHUB_API_BASE}/user/repos`, {
+  const response = await fetchWithRetry(`${GITHUB_API_BASE}/user/repos`, {
     method: "POST",
     headers: {
       Accept: "application/vnd.github+json",
@@ -162,7 +205,7 @@ export async function uploadToGitHub(
   const branch = process.env.GITHUB_REPO_BRANCH?.trim() || DEFAULT_BRANCH;
   const contentPath = buildContentPath(filename);
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
       repo
     )}/contents/${contentPath}`,

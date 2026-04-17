@@ -11,16 +11,25 @@ import { Heart, MessageCircle, Trash2, CornerDownRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Comment } from "@/types";
+import type { Profile } from "@/types";
+import type { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import Link from "next/link";
 
 interface CommentSectionProps {
   photoId: string;
   initialComments: Comment[];
+  initialUser?: User | null;
+  initialProfile?: Profile | null;
 }
 
-export function CommentSection({ photoId, initialComments }: CommentSectionProps) {
-  const { user, profile } = useUser();
+export function CommentSection({
+  photoId,
+  initialComments,
+  initialUser = null,
+  initialProfile = null,
+}: CommentSectionProps) {
+  const { user, profile } = useUser({ initialUser, initialProfile });
   const { comments, addOptimistic, removeOptimistic, updateOptimistic } =
     useRealtimeComments(photoId, initialComments);
   const [content, setContent] = useState("");

@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { uploadToGitHub } from "@/lib/github-storage";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function uploadAvatar(formData: FormData) {
   const supabase = await createClient();
@@ -32,6 +32,8 @@ export async function uploadAvatar(formData: FormData) {
 
     revalidatePath("/me");
     revalidatePath("/");
+    revalidateTag("public-photos", "max");
+    revalidateTag("search-photos", "max");
     return { success: true, url };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "上传失败" };

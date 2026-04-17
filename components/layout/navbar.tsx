@@ -84,7 +84,18 @@ export function Navbar() {
           </nav>
 
           {/* Right section */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Mobile search button - always visible on mobile */}
+            <Link href="/search" className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <Search className="h-[18px] w-[18px]" />
+              </Button>
+            </Link>
+
             {loading ? (
               <div className="h-8 w-8 rounded-full bg-gray-100 animate-pulse" />
             ) : user ? (
@@ -181,43 +192,90 @@ export function Navbar() {
 
         {/* Mobile dropdown menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-gray-100 py-2 pb-3 space-y-0.5 animate-in slide-in-from-top-2 duration-200">
-            <Link
-              href="/"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <Home className="h-4 w-4 text-gray-400" />
-              首页
-            </Link>
-            <Link
-              href="/search"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <Search className="h-4 w-4 text-gray-400" />
-              搜索
-            </Link>
-            {user && (
-              <>
-                <Link
-                  href="/upload"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <Upload className="h-4 w-4 text-gray-400" />
-                  上传照片
-                </Link>
-                <Link
-                  href="/me"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <Images className="h-4 w-4 text-gray-400" />
-                  我的照片
-                </Link>
-              </>
+          <div className="md:hidden border-t border-gray-100 py-3 pb-4 animate-in slide-in-from-top-2 duration-200">
+            {/* User info banner on mobile */}
+            {user && profile && (
+              <div className="flex items-center gap-3 px-4 py-3 mb-2 mx-2 rounded-xl bg-gray-50/80">
+                <Avatar className="h-9 w-9 overflow-hidden">
+                  {profile.avatar_url ? (
+                    <AvatarImage
+                      src={profile.avatar_url}
+                      alt={profile.username || "头像"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : null}
+                  <AvatarFallback className="bg-gray-900 text-white text-xs">
+                    {(profile.username || "U").charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    {profile.username || "用户"}
+                  </p>
+                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                </div>
+              </div>
             )}
+
+            <div className="space-y-0.5 px-2">
+              <Link
+                href="/"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
+              >
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-500">
+                  <Home className="h-4 w-4" />
+                </div>
+                首页
+              </Link>
+              <Link
+                href="/search"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
+              >
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-500">
+                  <Search className="h-4 w-4" />
+                </div>
+                搜索照片
+              </Link>
+              {user && (
+                <>
+                  <Link
+                    href="/upload"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-500">
+                      <Upload className="h-4 w-4" />
+                    </div>
+                    上传照片
+                  </Link>
+                  <Link
+                    href="/me"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-500">
+                      <Images className="h-4 w-4" />
+                    </div>
+                    我的照片
+                  </Link>
+                  <div className="my-2 mx-3 border-t border-gray-100" />
+                  <button
+                    onClick={async () => {
+                      setMobileOpen(false);
+                      await logout();
+                    }}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors w-full"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-500">
+                      <LogOut className="h-4 w-4" />
+                    </div>
+                    退出登录
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

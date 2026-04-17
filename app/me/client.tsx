@@ -371,6 +371,14 @@ export function MyPhotosClient({
       toast.error(result.error);
     } else if (result.url) {
       setAvatarUrl(result.url);
+      // Update avatar in locally-cached photo profiles so cards reflect the change instantly
+      setPhotos((prev) =>
+        prev.map((p) =>
+          p.profiles
+            ? { ...p, profiles: { ...p.profiles, avatar_url: result.url! } }
+            : p
+        )
+      );
       window.dispatchEvent(new Event("profile-updated"));
       router.refresh();
       toast.success("头像已更新");

@@ -5,11 +5,17 @@ import { useEffect, useRef, useState } from "react";
 import type { AuthChangeEvent, Session, User, UserResponse } from "@supabase/supabase-js";
 import type { Profile } from "@/types";
 
-export function useUser() {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const userRef = useRef<User | null>(null);
+interface UseUserOptions {
+  initialUser?: User | null;
+  initialProfile?: Profile | null;
+}
+
+export function useUser({ initialUser = null, initialProfile = null }: UseUserOptions = {}) {
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [profile, setProfile] = useState<Profile | null>(initialProfile);
+  const [loading, setLoading] = useState(!initialUser);
+  const userRef = useRef<User | null>(initialUser);
+  const initialUserRef = useRef<User | null>(initialUser);
 
   useEffect(() => {
     const supabase = createClient();
@@ -51,18 +57,32 @@ export function useUser() {
 
     void supabase.auth
       .getUser()
-      .then((result: UserResponse) => syncUser(result.data.user ?? null))
+      .then((result: UserResponse) => {
+        const nextUser = result.data.user ?? null;
+
+        if (!nextUser && initialUserRef.current) {
+          if (!active) return;
+          setLoading(false);
+          return;
+        }
+
+        void syncUser(nextUser);
+      })
       .catch(() => {
         if (active) {
-          setUser(null);
-          setProfile(null);
           setLoading(false);
         }
       });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      if (event === "INITIAL_SESSION" && !session?.user && initialUserRef.current) {
+        if (!active) return;
+        setLoading(false);
+        return;
+      }
+
       void syncUser(session?.user ?? null);
     });
 

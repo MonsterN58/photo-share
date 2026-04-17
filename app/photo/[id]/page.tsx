@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/site-config";
 import { Eye, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import type { Photo, Comment } from "@/types";
+import type { Photo, Comment, Profile } from "@/types";
 import { PhotoDetailClient } from "./client";
 import type { Metadata } from "next";
 
@@ -49,14 +49,19 @@ export default async function PhotoDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser();
 
   let hasLiked = false;
+  let initialProfile: Profile | null = null;
   if (user) {
-    const { data: likeRow } = await supabase
-      .from("photo_likes")
-      .select("photo_id")
-      .eq("photo_id", id)
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const [{ data: likeRow }, { data: profile }] = await Promise.all([
+      supabase
+        .from("photo_likes")
+        .select("photo_id")
+        .eq("photo_id", id)
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+    ]);
     hasLiked = !!likeRow;
+    initialProfile = (profile as Profile | null) ?? null;
   }
 
   const { data: comments } = await supabase
@@ -150,7 +155,12 @@ export default async function PhotoDetailPage({ params }: Props) {
             <div className="border-t border-gray-100" />
 
             {/* 评论 */}
-            <CommentSection photoId={id} initialComments={typedComments} />
+            <CommentSection
+              photoId={id}
+              initialComments={typedComments}
+              initialUser={user}
+              initialProfile={initialProfile}
+            />
           </div>
         </div>
       </div>
