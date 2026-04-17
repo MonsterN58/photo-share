@@ -1,0 +1,15 @@
+
+> photo-share@0.1.0 dev
+> next dev -p 3032
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3032
+- Network:       http://169.254.215.53:3032
+- Environments: .env.local
+✓ Ready in 730ms
+Creating turbopack project { dir: 'D:\\AIcode项目\\盐选\\photo-share', testMode: true }
+
+○ Compiling /login ...
+ GET /login 200 in 4.8s (next.js: 4.1s, proxy.ts: 91ms, application-code: 612ms)
+ GET / 200 in 18.9s (next.js: 1090ms, proxy.ts: 20ms, application-code: 17.8s)
+[?25h

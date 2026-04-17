@@ -1,0 +1,271 @@
+# PhotoShare - 项目架构文档
+
+> **本文件供 AI 助手和开发者了解项目架构。每次修改代码后请同步更新此文件。**
+
+## 最后更新
+
+- **日期**: 2026-04-17
+- **更新内容**: GitHub 图床展示地址切换为 jsDelivr CDN
+
+### 修改日志
+
+| 日期 | 修改内容 |
+|---|---|
+| 2026-04-17 | 项目初始化，完成 MVP 全部核心文件 |
+| 2026-04-17 | 修复 shadcn/ui base-ui 组件的 `asChild` → `render` prop 适配（navbar, share-button, me/client） |
+| 2026-04-17 | 修复 Zod `.error.errors` → `.error.issues` 属性访问（auth, photo, comment actions） |
+| 2026-04-17 | 修复 `Buffer` → `Uint8Array` 类型转换（remit.ts） |
+| 2026-04-17 | 登录页面增加 `Suspense` 边界包裹 `useSearchParams`（login/page.tsx） |
+| 2026-04-17 | 图片上传改为 GitHub Contents API，文件写入 GitHub 仓库并使用 raw URL 展示 |
+| 2026-04-17 | GitHub 图床展示地址改为 jsDelivr CDN，可通过 `GITHUB_IMAGE_CDN=raw` 回退 raw URL |
+| 2026-04-17 | 新增 Windows 一键启动脚本 `start-dev.cmd` / `scripts/start-dev.ps1` |
+
+---
+
+## 一、项目概述
+
+PhotoShare 是一个高质量照片分享网站，参考 Unsplash 的极简视觉风格。支持用户注册登录、照片上传（通过 GitHub 仓库托管）、瀑布流展示、评论互动、分享功能。
+
+### 核心特性
+
+- Unsplash 风格的 Masonry 瀑布流布局
+- 图片上传前前端自动压缩为 WebP
+- 图片存储于 GitHub 仓库，数据库仅存 CDN URL
+- 实时评论（Supabase Realtime）
+- 支持公开/私密相册
+- 二维码分享
+- 响应式设计（Mobile First）
+
+---
+
+## 二、技术栈
+
+| 技术 | 版本/说明 |
+|------|-----------|
+| Next.js | 15+, App Router |
+| TypeScript | 严格模式 |
+| Tailwind CSS | v4 |
+| shadcn/ui | 组件库 |
+| Supabase | Auth + PostgreSQL + Realtime |
+| Zod | 表单校验 |
+| Lucide React | 图标 |
+| browser-image-compression | 前端图片压缩 |
+| qrcode | 二维码生成 |
+| date-fns | 日期格式化 |
+
+---
+
+## 三、目录结构
+
+```
+photo-share/
+├── app/                          # Next.js App Router 页面
+│   ├── layout.tsx                # 根布局（导航、Footer、Toaster）
+│   ├── page.tsx                  # 首页（Hero + 搜索 + 瀑布流画廊）
+│   ├── login/page.tsx            # 登录/注册页
+│   ├── upload/page.tsx           # 上传页（需登录）
+│   ├── photo/[id]/               # 照片详情
+│   │   ├── page.tsx              # 详情页（Server Component）
+│   │   └── client.tsx            # 客户端浏览量统计
+│   ├── me/                       # 个人中心
+│   │   ├── page.tsx              # 我的照片（Server Component）
+│   │   └── client.tsx            # 照片管理客户端逻辑
+│   └── auth/callback/route.ts    # OAuth 回调
+│
+├── components/
+│   ├── layout/
+│   │   ├── navbar.tsx            # 顶部导航栏
+│   │   └── footer.tsx            # 页脚
+│   ├── photo/
+│   │   ├── photo-card.tsx        # 照片卡片（hover 交互）
+│   │   ├── masonry-grid.tsx      # 瀑布流布局 + 无限滚动
+│   │   ├── search-bar.tsx        # 搜索框
+│   │   ├── filter-bar.tsx        # 筛选排序
+│   │   └── share-button.tsx      # 分享按钮（链接复制+二维码）
+│   ├── comment/
+│   │   └── comment-section.tsx   # 评论区（实时更新）
+│   ├── upload/
+│   │   └── upload-form.tsx       # 上传表单（拖拽+压缩+预览）
+│   └── ui/                       # shadcn/ui 组件
+│
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts             # 浏览器端 Supabase 客户端
+│   │   ├── server.ts             # 服务端 Supabase 客户端
+│   │   └── middleware.ts         # Session 刷新中间件
+│   ├── github-storage.ts         # GitHub 仓库上传封装
+│   ├── validators.ts             # Zod Schema 定义
+│   ├── utils.ts                  # 工具函数（shadcn cn()）
+│   └── actions/
+│       ├── auth.ts               # 认证 Server Actions
+│       ├── photo.ts              # 照片 Server Actions
+│       └── comment.ts            # 评论 Server Actions
+│
+├── hooks/
+│   ├── use-user.ts               # 用户状态 Hook
+│   └── use-realtime-comments.ts  # 实时评论 Hook
+│
+├── types/
+│   └── index.ts                  # TypeScript 类型定义
+│
+├── supabase/
+│   └── schema.sql                # 数据库建表 + RLS 策略
+│
+├── middleware.ts                  # Next.js 中间件（Session）
+├── .env.local.example            # 环境变量模板
+└── README.ai                     # 本文件
+```
+
+---
+
+## 四、数据库设计
+
+### 表结构
+
+#### profiles
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid (PK, FK→auth.users) | 用户ID |
+| username | text | 用户名 |
+| avatar_url | text | 头像URL |
+| bio | text | 个人简介 |
+| created_at | timestamptz | 创建时间 |
+
+#### photos
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid (PK) | 照片ID |
+| url | text | 图片URL（默认 jsDelivr CDN） |
+| title | text | 标题 |
+| description | text | 描述 |
+| user_id | uuid (FK→profiles) | 上传者 |
+| is_public | boolean | 是否公开 |
+| width | integer | 图片宽度 |
+| height | integer | 图片高度 |
+| views | integer | 浏览次数 |
+| created_at | timestamptz | 创建时间 |
+
+#### comments
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid (PK) | 评论ID |
+| photo_id | uuid (FK→photos) | 所属照片 |
+| user_id | uuid (FK→profiles) | 评论者 |
+| content | text | 评论内容 |
+| parent_id | uuid (FK→comments) | 父评论ID |
+| likes | integer | 点赞数 |
+| created_at | timestamptz | 创建时间 |
+
+### RLS 策略摘要
+
+- **profiles**: 任何人可读；用户只能改自己的
+- **photos**: 公开照片任何人可读，私密照片仅本人；增删改限本人
+- **comments**: 任何人可读；登录用户可发；仅本人可删
+
+### RPC 函数
+
+- `increment_views(photo_id)`: 浏览量+1
+- `increment_comment_likes(comment_id)`: 点赞+1
+
+---
+
+## 五、关键架构决策
+
+### 图片存储
+- 图片不存 Supabase Storage 或本地
+- 上传流程：前端压缩 → Server Action → GitHub Contents API → 存 raw URL 到 photos 表
+- 服务端使用 GitHub REST API 将图片 Base64 写入指定仓库目录
+- 图片展示默认使用 jsDelivr CDN 地址：`https://cdn.jsdelivr.net/gh/{owner}/{repo}@{branch}/{path}`
+- 如需回退到 `raw.githubusercontent.com`，设置 `GITHUB_IMAGE_CDN=raw`
+- 图床仓库应为公开仓库，否则前端图片无法直接访问
+
+### Server Components vs Client Components
+- 页面级组件尽量用 Server Components
+- 交互性组件（搜索、上传、评论、导航）使用 Client Components
+- Server Actions 处理所有数据变更
+
+### 认证
+- Supabase Auth（邮箱+密码）
+- 中间件刷新 Session
+- 预留 OAuth 扩展位
+
+### 实时功能
+- 评论区通过 Supabase Realtime 实时更新
+- `use-realtime-comments` Hook 监听 postgres_changes
+
+---
+
+## 六、环境变量
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=       # Supabase 项目 URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=  # Supabase 匿名 Key
+GITHUB_TOKEN=                   # GitHub Personal Access Token（需要仓库 Contents 写权限）
+GITHUB_REPO_OWNER=              # GitHub 用户名或组织名
+GITHUB_REPO_NAME=               # 用作图床的仓库名
+GITHUB_REPO_BRANCH=             # 分支名，默认 main
+GITHUB_IMAGE_DIR=               # 仓库内图片目录，默认 uploads
+GITHUB_IMAGE_CDN=               # 图片展示地址，默认 jsdelivr；设为 raw 可回退 GitHub raw
+NEXT_PUBLIC_SITE_URL=           # 站点 URL
+```
+
+---
+
+## 七、本地开发
+
+```bash
+# 1. 克隆项目
+cd photo-share
+
+# 2. 安装依赖
+npm install
+
+# 3. 配置环境变量
+cp .env.local.example .env.local
+# 编辑 .env.local 填入你的 Supabase 和 GitHub 图床配置
+
+# 4. 执行数据库初始化
+# 在 Supabase SQL Editor 中执行 supabase/schema.sql
+
+# 5. 启动开发服务器
+npm run dev
+
+# 或 Windows 一键启动
+start-dev.cmd
+```
+
+---
+
+## 八、部署
+
+### Tencent EdgeOne Pages
+1. 将代码推送到 Git 仓库
+2. 在 EdgeOne Pages 创建项目
+3. 选择 Next.js 框架
+4. 配置环境变量
+5. 部署
+
+### 其他平台
+兼容 Vercel、Netlify 等支持 Next.js 的平台。
+
+---
+
+## 九、后续扩展点
+
+- [ ] 收藏功能（favorites 表）
+- [ ] 标签系统（tags 表 + photo_tags 关联表）
+- [ ] AI 自动打标签
+- [ ] EXIF 信息展示
+- [ ] 下载控制 / 水印
+- [ ] 管理后台
+- [ ] 微信 OAuth 登录
+- [ ] 图片瀑布流虚拟滚动优化
+- [ ] CDN 图片优化（多尺寸裁切）
+
+---
+
+## 十、修改记录
+
+| 日期 | 修改内容 | 修改者 |
+|------|----------|--------|
+| 2026-04-17 | 项目初始化，完成 MVP 全部核心文件 | AI |
