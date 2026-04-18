@@ -12,7 +12,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       closeButton
-      closeButtonAriaLabel="Close notification"
       icons={{
         success: (
           <CircleCheckIcon className="size-4" />
