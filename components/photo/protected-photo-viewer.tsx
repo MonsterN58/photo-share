@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DynamicWatermark } from "@/components/photo/dynamic-watermark";
 import { ImageProtectionOverlay } from "@/components/photo/image-protection-overlay";
 import { useCaptureGuard } from "@/hooks/use-capture-guard";
+import { shouldBypassImageOptimization } from "@/lib/image-url";
 
 interface ProtectedPhotoViewerProps {
   url: string;
@@ -267,6 +268,7 @@ export function ProtectedPhotoViewer({
           } ${isObscured ? "scale-[1.02] blur-2xl" : ""}`}
           sizes={isFullscreen ? "100vw" : "(max-width: 1024px) 100vw, 60vw"}
           priority
+          unoptimized={shouldBypassImageOptimization(url)}
           draggable={false}
         />
         <ImageProtectionOverlay />

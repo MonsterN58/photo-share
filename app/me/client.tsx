@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/dialog";
 import { useBoxSelect } from "@/hooks/use-box-select";
 import { parseCoverUrls, serializeCoverUrls } from "@/lib/cover";
+import { shouldBypassImageOptimization } from "@/lib/image-url";
 import type { Album, Photo, Portfolio, Profile } from "@/types";
 
 type View =
@@ -969,6 +970,7 @@ function AlbumCollectionTile({
                         fill
                         className="object-cover transition-transform duration-200 group-hover:scale-105"
                         sizes="(max-width: 640px) 33vw, 180px"
+                        unoptimized={shouldBypassImageOptimization(photo.url)}
                       />
                       {isCurrent ? (
                         <div className="absolute inset-0 flex items-center justify-center bg-blue-500/20">
@@ -1140,6 +1142,7 @@ function PhotoTile({
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            unoptimized={shouldBypassImageOptimization(photo.url)}
           />
           {canDropForAlbum && (
             <div

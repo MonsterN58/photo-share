@@ -10,6 +10,7 @@ import { ImageProtectionOverlay } from "@/components/photo/image-protection-over
 import { Button } from "@/components/ui/button";
 import { incrementViews, likePhoto, unlikePhoto } from "@/lib/actions/photo";
 import { downloadImageAsJpeg } from "@/lib/download-image";
+import { shouldBypassImageOptimization } from "@/lib/image-url";
 import { siteConfig } from "@/lib/site-config";
 import { toast } from "sonner";
 
@@ -172,6 +173,7 @@ export function PhotoCard({ photo, trackViews = true, hideAuthor = false, mobile
               }`}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
               onLoad={() => setLoaded(true)}
+              unoptimized={shouldBypassImageOptimization(photo.url)}
               draggable={false}
             />
             <ImageProtectionOverlay />
