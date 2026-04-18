@@ -157,7 +157,7 @@ export function UserProfileClient({
                           <div className="absolute bottom-0 left-0 right-0 p-4">
                             <h3 className="text-base font-semibold text-white truncate">{portfolio.title}</h3>
                             {portfolio.description && (
-                              <p className="mt-0.5 text-xs text-white/70 line-clamp-1">{portfolio.description}</p>
+                              <p className="description-clamp mt-0.5 line-clamp-1 text-xs text-white/70">{portfolio.description}</p>
                             )}
                             <div className="mt-2 flex items-center gap-3 text-[11px] text-white/60">
                               <span className="flex items-center gap-1">

@@ -253,6 +253,17 @@ img.photo-protected {
   animation: like-burst 0.5s ease-out;
 }
 
+.description-text {
+  white-space: pre-line;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.description-clamp {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 @keyframes watermark-drift {
   0% {
     transform: translate3d(0, 0, 0) rotate(-18deg);

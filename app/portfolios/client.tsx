@@ -69,7 +69,7 @@ function PortfolioCard({ portfolio }: { portfolio: Portfolio }) {
             {portfolio.title}
           </Link>
           {portfolio.description && (
-            <p className="mt-1 text-sm text-gray-500 line-clamp-2 leading-relaxed">{portfolio.description}</p>
+            <p className="description-clamp mt-1 line-clamp-2 text-sm leading-relaxed text-gray-500">{portfolio.description}</p>
           )}
         </div>
 

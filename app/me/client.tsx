@@ -33,6 +33,7 @@ import { publishPortfolio, updatePortfolioCover } from "@/lib/actions/portfolio"
 import { uploadAvatar, uploadCover, updateProfileInfo } from "@/lib/actions/profile";
 import { ShareButton } from "@/components/photo/share-button";
 import { CoverCollage } from "@/components/photo/cover-collage";
+import { ImageProtectionOverlay } from "@/components/photo/image-protection-overlay";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -564,7 +565,7 @@ export function MyPhotosClient({
           )}
         </div>
       ) : isAlbumView ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visiblePhotos.map((photo) => (
             <PhotoTile
               key={photo.id}
@@ -588,7 +589,7 @@ export function MyPhotosClient({
           ))}
         </div>
       ) : (
-        <div ref={gridRef} className="relative grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 select-none">
+        <div ref={gridRef} className="relative grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 select-none">
           {selectionRect && (
             <div
               className="absolute z-30 border-2 border-blue-400 bg-blue-400/10 rounded pointer-events-none"
@@ -779,7 +780,7 @@ function AlbumCollectionTile({
   return (
     <div
       data-album-id={album.id}
-      className={`group relative overflow-hidden rounded-lg border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+      className={`group relative overflow-hidden rounded-lg border bg-gray-100 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
         isDropTarget ? "border-gray-900 ring-2 ring-gray-900/10" : "border-gray-100 hover:border-gray-200"
       }`}
       onDragOver={(event) => {
@@ -803,14 +804,14 @@ function AlbumCollectionTile({
         type="button"
         onClick={onToggle}
         disabled={isPending}
-        className={`absolute left-2 top-2 z-20 flex h-7 min-w-7 items-center justify-center rounded-md border px-1.5 text-xs transition-all ${
+        className={`absolute left-2 top-2 z-20 flex h-7 w-7 items-center justify-center rounded-md border text-xs transition-all ${
           fullySelected
             ? "border-gray-900 bg-gray-900 text-white opacity-100"
-            : "border-white/70 bg-white/90 text-gray-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 hover:text-gray-900"
+            : "border-white/70 bg-white/85 text-gray-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 hover:text-gray-900"
         }`}
         aria-label={fullySelected ? "取消选择相册照片" : "选择相册照片"}
       >
-        {fullySelected ? <Check className="h-4 w-4" /> : selectedCount || ""}
+        {fullySelected && <Check className="h-4 w-4" />}
       </button>
 
       <div
@@ -832,9 +833,58 @@ function AlbumCollectionTile({
             sizes="(max-width: 640px) 50vw, 25vw"
             imageClassName="transition-transform duration-300 group-hover:scale-[1.02]"
           />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent p-3">
+          <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/65 via-black/20 to-transparent p-3">
             <p className="truncate text-sm font-semibold text-white">{album.name}</p>
-            <p className="mt-0.5 text-xs text-white/75">{photos.length} 张照片</p>
+            <div className="mt-2 flex items-end justify-between gap-3">
+              <div className="min-w-0 text-xs text-white/75">
+                <p className="truncate">{album.description || "相册"}</p>
+                <p className="mt-0.5">
+                  {formatDistanceToNow(new Date(album.created_at), {
+                    addSuffix: true,
+                    locale: zhCN,
+                  })}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                {portfolio && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); openCoverPicker(); }}
+                    disabled={isPending || photos.length === 0}
+                    className="h-7 bg-white/12 px-2 text-white hover:bg-white/20 hover:text-white"
+                    aria-label="更换作品集封面"
+                    title="更换作品集封面"
+                  >
+                    <ImageIcon className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); onPublish(); }}
+                  disabled={isPending}
+                  className="h-7 bg-white/12 px-2 text-white hover:bg-white/20 hover:text-white"
+                  aria-label="发布为作品集"
+                  title="发布为作品集"
+                >
+                  <BookImage className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  disabled={isPending}
+                  className="h-7 bg-white/12 px-2 text-white hover:bg-red-500/90 hover:text-white"
+                  aria-label="删除相册"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
           </div>
           {canDrop && (
             <div
@@ -848,8 +898,8 @@ function AlbumCollectionTile({
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between gap-2 px-3 py-2">
-          <span className="truncate text-xs text-gray-500">{album.description || "相册"}</span>
+        <div className="hidden">
+          <span className="hidden">{album.description || "相册"}</span>
           <div className="flex items-center gap-1">
             {/* Desktop hover buttons */}
             {portfolio && (
@@ -857,7 +907,7 @@ function AlbumCollectionTile({
                 type="button"
                 onClick={(e) => { e.stopPropagation(); openCoverPicker(); }}
                 disabled={isPending || photos.length === 0}
-                className="hidden sm:flex h-6 w-6 items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-purple-500 hover:bg-purple-50"
+                className="hidden h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-500 opacity-0 shadow-sm transition-opacity hover:bg-white hover:text-purple-500 group-hover:opacity-100 group-focus-within:opacity-100 sm:flex"
                 aria-label="更换作品集封面"
                 title="更换作品集封面"
               >
@@ -868,7 +918,7 @@ function AlbumCollectionTile({
               type="button"
               onClick={(e) => { e.stopPropagation(); onPublish(); }}
               disabled={isPending}
-              className="hidden sm:flex h-6 w-6 items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-blue-500 hover:bg-blue-50"
+              className="hidden h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-500 opacity-0 shadow-sm transition-opacity hover:bg-white hover:text-blue-500 group-hover:opacity-100 group-focus-within:opacity-100 sm:flex"
               aria-label="发布为作品集"
               title="发布为作品集"
             >
@@ -878,7 +928,7 @@ function AlbumCollectionTile({
               type="button"
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
               disabled={isPending}
-              className="hidden sm:flex h-6 w-6 items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:bg-red-50"
+              className="hidden h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-500 opacity-0 shadow-sm transition-opacity hover:bg-white hover:text-red-500 group-hover:opacity-100 group-focus-within:opacity-100 sm:flex"
               aria-label="删除相册"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -890,7 +940,7 @@ function AlbumCollectionTile({
                   <button
                     type="button"
                     onClick={(e) => e.stopPropagation()}
-                    className="sm:hidden h-6 w-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                    className="flex h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-500 shadow-sm transition-colors hover:bg-white hover:text-gray-900 sm:hidden"
                     aria-label="更多操作"
                   />
                 }
@@ -926,7 +976,7 @@ function AlbumCollectionTile({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <AlbumIcon className="h-3.5 w-3.5 shrink-0 text-gray-300" />
+            <AlbumIcon className="hidden h-3.5 w-3.5 shrink-0 text-gray-300" />
           </div>
         </div>
       </div>
@@ -968,10 +1018,12 @@ function AlbumCollectionTile({
                         src={photo.url}
                         alt={photo.title}
                         fill
-                        className="object-cover transition-transform duration-200 group-hover:scale-105"
+                        className="photo-protected object-cover transition-transform duration-200 group-hover:scale-105"
                         sizes="(max-width: 640px) 33vw, 180px"
                         unoptimized={shouldBypassImageOptimization(photo.url)}
+                        draggable={false}
                       />
+                      <ImageProtectionOverlay />
                       {isCurrent ? (
                         <div className="absolute inset-0 flex items-center justify-center bg-blue-500/20">
                           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 shadow-md">
@@ -1130,7 +1182,7 @@ function PhotoTile({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`group relative overflow-hidden rounded-lg border bg-gray-100 transition-all ${
+      className={`group relative self-start overflow-hidden rounded-lg border bg-gray-100 transition-all ${
         selected ? "border-gray-900 ring-2 ring-gray-900/20" : isPhotoDropTarget ? "border-blue-400 ring-2 ring-blue-400/20" : "border-gray-100"
       } ${isDragging || touchDragging ? "scale-[0.95] opacity-60 z-50" : ""}`}
     >

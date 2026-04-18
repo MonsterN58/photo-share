@@ -94,7 +94,7 @@ export default async function PhotoDetailPage({ params }: Props) {
                 {typedPhoto.title}
               </h1>
               {typedPhoto.description && (
-                <p className="text-sm text-gray-500 leading-relaxed break-words">
+                <p className="description-text text-sm leading-relaxed text-gray-500">
                   {typedPhoto.description}
                 </p>
               )}

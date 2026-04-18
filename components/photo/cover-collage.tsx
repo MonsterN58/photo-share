@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { BookImage } from "lucide-react";
+import { ImageProtectionOverlay } from "@/components/photo/image-protection-overlay";
 import { parseCoverUrls } from "@/lib/cover";
 import { shouldBypassImageOptimization } from "@/lib/image-url";
 
@@ -42,11 +43,13 @@ export function CoverCollage({
             src={url}
             alt={alt}
             fill
-            className={`object-cover ${imageClassName}`}
+            className={`photo-protected object-cover ${imageClassName}`}
             sizes={sizes}
             priority={priority && index === 0}
             unoptimized={shouldBypassImageOptimization(url)}
+            draggable={false}
           />
+          <ImageProtectionOverlay />
         </div>
       ))}
     </div>

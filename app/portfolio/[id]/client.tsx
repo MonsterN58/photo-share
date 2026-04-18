@@ -52,7 +52,7 @@ export function PortfolioDetail({ portfolio, photos }: PortfolioDetailProps) {
               {portfolio.title}
             </h1>
             {portfolio.description && (
-              <p className="mt-2 text-sm sm:text-base text-white/75 max-w-2xl leading-relaxed">
+              <p className="description-text mt-2 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
                 {portfolio.description}
               </p>
             )}
