@@ -3,9 +3,14 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getCurrentUser } from "@/lib/auth-adapter";
 import { getDatabaseMode } from "@/lib/database-mode";
-import { updateProfile, updateProfileAvatar } from "@/lib/local-db";
+import { isUsernameTaken, updateProfile, updateProfileAvatar } from "@/lib/local-db";
 import { uploadImage } from "@/lib/storage";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
+import { usernameSchema } from "@/lib/validators";
+
+function isUniqueConstraintError(error: unknown) {
+  return error instanceof Error && error.message.toLowerCase().includes("unique constraint failed");
+}
 
 export async function uploadAvatar(formData: FormData) {
   const user = await getCurrentUser();
@@ -82,20 +87,44 @@ export async function updateProfileInfo(formData: FormData) {
 
   const username = String(formData.get("username") || "").trim();
   const bio = String(formData.get("bio") || "").trim();
+  const parsedUsername = usernameSchema.safeParse(username);
 
-  if (!username || username.length > 30) return { error: "用户名不能为空且最多30字" };
+  if (!parsedUsername.success) return { error: parsedUsername.error.issues[0].message };
   if (bio.length > 200) return { error: "简介最多200字" };
 
   if (getDatabaseMode() === "remote") {
     const supabase = await createSupabaseClient();
+    const { data: existingProfiles, error: usernameLookupError } = await supabase
+      .from("profiles")
+      .select("id, username")
+      .neq("id", user.id)
+      .ilike("username", parsedUsername.data);
+
+    if (usernameLookupError) return { error: usernameLookupError.message };
+    if ((existingProfiles || []).some((profile) => profile.username?.toLowerCase() === parsedUsername.data.toLowerCase())) {
+      return { error: "该用户名已被使用，请换一个用户名。" };
+    }
+
     const { error } = await supabase
       .from("profiles")
-      .update({ username, bio: bio || null })
+      .update({ username: parsedUsername.data, bio: bio || null })
       .eq("id", user.id);
 
     if (error) return { error: error.message };
   } else {
-    updateProfile(user.id, { username, bio: bio || null });
+    if (isUsernameTaken(parsedUsername.data, user.id)) {
+      return { error: "该用户名已被使用，请换一个用户名。" };
+    }
+
+    try {
+      updateProfile(user.id, { username: parsedUsername.data, bio: bio || null });
+    } catch (error) {
+      if (isUniqueConstraintError(error)) {
+        return { error: "该用户名已被使用，请换一个用户名。" };
+      }
+
+      return { error: error instanceof Error ? error.message : "更新失败，请稍后再试。" };
+    }
   }
 
   revalidatePath("/me");

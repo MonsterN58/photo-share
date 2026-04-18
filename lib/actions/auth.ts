@@ -1,7 +1,7 @@
 "use server";
 
 import { clearLoginSession, createLoginSession, hashPassword, verifyPassword } from "@/lib/local-auth";
-import { createUser, getUserByEmail } from "@/lib/local-db";
+import { createUser, getUserByEmail, isUsernameTaken } from "@/lib/local-db";
 import { getDatabaseMode } from "@/lib/database-mode";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import { loginSchema, registerSchema } from "@/lib/validators";
@@ -18,6 +18,10 @@ function getLoginErrorMessage(message: string) {
   }
 
   return message || "登录失败，请稍后再试。";
+}
+
+function isUniqueConstraintError(error: unknown) {
+  return error instanceof Error && error.message.toLowerCase().includes("unique constraint failed");
 }
 
 export async function login(formData: FormData) {
@@ -51,6 +55,7 @@ export async function register(formData: FormData) {
     email: formData.get("email"),
     password: formData.get("password"),
     username: formData.get("username"),
+    agreeTerms: formData.get("agreeTerms"),
   });
 
   if (!parsed.success) {
@@ -59,6 +64,16 @@ export async function register(formData: FormData) {
 
   if (getDatabaseMode() === "remote") {
     const supabase = await createSupabaseClient();
+    const { data: existingProfiles, error: usernameLookupError } = await supabase
+      .from("profiles")
+      .select("id, username")
+      .ilike("username", parsed.data.username);
+
+    if (usernameLookupError) return { error: usernameLookupError.message };
+    if ((existingProfiles || []).some((profile) => profile.username?.toLowerCase() === parsed.data.username.toLowerCase())) {
+      return { error: "该用户名已被使用，请换一个用户名。" };
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
@@ -91,10 +106,22 @@ export async function register(formData: FormData) {
     return { error: "该邮箱已经注册。" };
   }
 
-  const passwordHash = await hashPassword(parsed.data.password);
-  const user = createUser(parsed.data.email, passwordHash, parsed.data.username);
-  await createLoginSession(user.id);
-  return { success: true };
+  if (isUsernameTaken(parsed.data.username)) {
+    return { error: "该用户名已被使用，请换一个用户名。" };
+  }
+
+  try {
+    const passwordHash = await hashPassword(parsed.data.password);
+    const user = createUser(parsed.data.email, passwordHash, parsed.data.username);
+    await createLoginSession(user.id);
+    return { success: true };
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return { error: "该邮箱或用户名已被使用，请换一个。" };
+    }
+
+    return { error: error instanceof Error ? error.message : "注册失败，请稍后再试。" };
+  }
 }
 
 export async function logout() {

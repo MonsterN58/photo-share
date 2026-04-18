@@ -22,10 +22,17 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isRegister, setIsRegister] = useState(searchParams.get("tab") === "register");
+  const isRegister = searchParams.get("tab") === "register";
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+
+  const switchMode = () => {
+    const nextIsRegister = !isRegister;
+    setError("");
+    setMessage("");
+    router.replace(nextIsRegister ? "/login?tab=register" : "/login", { scroll: false });
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -128,6 +135,32 @@ function LoginForm() {
             />
           </div>
 
+          {isRegister && (
+            <div className="space-y-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
+              <div className="max-h-44 space-y-3 overflow-y-auto pr-1 leading-6">
+                <p>
+                  欢迎加入 南开印象（nku.asia）。本网站为学生自发搭建的校园摄影分享平台，旨在为摄影爱好者提供作品展示与交流空间。本站与南开大学官方无隶属关系，不代表学校官方立场。
+                </p>
+                <p>注册即表示你已知悉并同意：</p>
+                <ol className="list-decimal space-y-2 pl-5">
+                  <li>你发布的图片、文字等内容应当合法合规，不得侵犯他人著作权、肖像权、隐私权等合法权益；</li>
+                  <li>你应保证对上传作品拥有相应权利或已获得必要授权；</li>
+                  <li>本站禁止发布违法、侵权、低俗、攻击性或其他不当内容；</li>
+                  <li>如有违规内容，本站有权删除相关内容并限制账号使用。</li>
+                </ol>
+              </div>
+              <label className="flex items-start gap-2 border-t border-gray-200 pt-3 text-gray-700">
+                <input
+                  name="agreeTerms"
+                  type="checkbox"
+                  required
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                />
+                <span>我已阅读并同意上述用户协议与隐私说明</span>
+              </label>
+            </div>
+          )}
+
           {error && (
             <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">
               {error}
@@ -155,11 +188,7 @@ function LoginForm() {
         <div className="text-center">
           <button
             type="button"
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setError("");
-              setMessage("");
-            }}
+            onClick={switchMode}
             className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
           >
             {isRegister ? "已有账号？登录" : "没有账号？注册"}

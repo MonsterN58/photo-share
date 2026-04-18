@@ -4,8 +4,8 @@
 
 ## 最后更新
 
-- **日期**: 2026-04-18
-- **更新内容**: 数据库与认证从 Supabase 切换为本地 SQLite + Cookie Session，图片继续使用 Gitee 存储
+- **日期**: 2026-04-19
+- **更新内容**: 本地 SQLite 注册/资料修改增加用户名查重、大小写不敏感唯一索引、主流邮箱域名校验与注册协议确认
 
 ### 修改日志
 
@@ -38,6 +38,7 @@
 | 2026-04-17 | 新增 `DynamicWatermark` 动态水印层，反截屏开启时为卡片与详情页主图叠加带时间戳和会话标识的动态水印 |
 | 2026-04-18 | 图片上传改为 Gitee Contents API，文件写入 Gitee 公开仓库并使用 raw URL 展示 |
 | 2026-04-18 | 数据库本地化为 SQLite（`better-sqlite3`），认证改为本地 users/sessions 表与 HttpOnly Cookie |
+| 2026-04-19 | 本地注册/修改资料增加用户名大小写不敏感查重，注册邮箱限制为主流邮箱域名，并要求同意用户协议与隐私说明 |
 
 ---
 
@@ -212,6 +213,9 @@ photo-share/
 
 ### 认证
 - 本地邮箱+密码注册登录
+- 注册邮箱限制为国内外主流邮箱域名
+- 用户名在本地 SQLite 中大小写不敏感唯一，注册和修改资料都会查重
+- 注册前必须阅读并同意用户协议与隐私说明
 - 密码使用 Node `scrypt` 加盐哈希
 - 登录状态使用 HttpOnly Cookie + SQLite `sessions` 表
 - 预留 OAuth 扩展位
@@ -225,8 +229,9 @@ photo-share/
 ## 六、环境变量
 
 ```env
+DATABASE_MODE=local                        # 本地 SQLite 模式
 LOCAL_DATABASE_PATH=data/photoshare.sqlite # SQLite 数据库路径，默认 data/photoshare.sqlite
-STORAGE_MODE=gitee                         # 可选 gitee / github / local
+STORAGE_MODE=local                         # 可选 local / gitee / github
 NEXT_PUBLIC_ANTI_SCREENSHOT_ENABLED=false # 是否启用全局反截屏/内容模糊保护
 GITEE_TOKEN=                    # Gitee Personal Access Token（需要仓库 Contents 写权限）
 GITEE_REPO_OWNER=               # Gitee 用户名或组织名

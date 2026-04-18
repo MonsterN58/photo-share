@@ -143,6 +143,11 @@ function migrate(database: Database.Database) {
     create index if not exists idx_albums_user_id on albums(user_id);
   `);
 
+  ensureUniqueProfileUsernames(database);
+  database.exec(`
+    create unique index if not exists idx_profiles_username_unique_lower on profiles(lower(username));
+  `);
+
   // Additional migrations for portfolios, notifications, and profile cover
   database.exec(`
     create table if not exists portfolios (
@@ -197,6 +202,35 @@ function migrate(database: Database.Database) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function ensureUniqueProfileUsernames(database: Database.Database) {
+  const rows = database
+    .prepare("select id, username from profiles order by lower(username), created_at, id")
+    .all() as { id: string; username: string }[];
+  const seen = new Set<string>();
+
+  for (const row of rows) {
+    const usernameKey = row.username.trim().toLowerCase();
+    if (!seen.has(usernameKey)) {
+      seen.add(usernameKey);
+      continue;
+    }
+
+    const suffix = row.id.replace(/-/g, "").slice(0, 6) || "user";
+    const base = row.username.trim().slice(0, 23) || "user";
+    let candidate = `${base}_${suffix}`;
+    let attempt = 1;
+
+    while (seen.has(candidate.toLowerCase())) {
+      const attemptSuffix = String(attempt);
+      candidate = `${base.slice(0, 29 - attemptSuffix.length)}_${attemptSuffix}`;
+      attempt += 1;
+    }
+
+    database.prepare("update profiles set username = ? where id = ?").run(candidate, row.id);
+    seen.add(candidate.toLowerCase());
+  }
 }
 
 function toProfile(row: PhotoRow | CommentRow | Profile | null | undefined): Profile | undefined {
@@ -286,14 +320,18 @@ export function createUser(email: string, passwordHash: string, username: string
   const id = randomUUID();
   const createdAt = nowIso();
 
-  database
-    .prepare("insert into users (id, email, password_hash, created_at) values (?, ?, ?, ?)")
-    .run(id, email.toLowerCase(), passwordHash, createdAt);
-  database
-    .prepare(
-      "insert into profiles (id, username, avatar_url, bio, created_at) values (?, ?, null, null, ?)"
-    )
-    .run(id, username, createdAt);
+  const insertUser = database.transaction(() => {
+    database
+      .prepare("insert into users (id, email, password_hash, created_at) values (?, ?, ?, ?)")
+      .run(id, email.toLowerCase(), passwordHash, createdAt);
+    database
+      .prepare(
+        "insert into profiles (id, username, avatar_url, bio, created_at) values (?, ?, null, null, ?)"
+      )
+      .run(id, username, createdAt);
+  });
+
+  insertUser();
 
   return getUserById(id)!;
 }
@@ -312,6 +350,17 @@ export function getUserById(id: string) {
 
 export function getProfile(userId: string) {
   return getDb().prepare("select * from profiles where id = ?").get(userId) as Profile | undefined;
+}
+
+export function isUsernameTaken(username: string, excludeUserId?: string) {
+  const normalized = username.trim().toLowerCase();
+  const sql = excludeUserId
+    ? "select id from profiles where lower(username) = ? and id <> ? limit 1"
+    : "select id from profiles where lower(username) = ? limit 1";
+  const row = excludeUserId
+    ? getDb().prepare(sql).get(normalized, excludeUserId)
+    : getDb().prepare(sql).get(normalized);
+  return Boolean(row);
 }
 
 export function upsertSession(sessionId: string, userId: string, expiresAt: Date) {
