@@ -148,32 +148,34 @@ export function UserProfileClient({
                       <p className="text-sm text-gray-400">暂无作品集</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       {publicPortfolios.map((portfolio) => (
                         <Link
                           key={portfolio.id}
                           href={`/portfolio/${portfolio.id}`}
-                          className="group relative rounded-xl overflow-hidden bg-gray-100 aspect-[3/2] shadow-sm hover:shadow-lg transition-all duration-300"
+                          className="group relative rounded-xl overflow-hidden bg-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 sm:hover:-translate-y-0.5"
                         >
-                          {portfolio.cover_url ? (
-                            <CoverCollage
-                              coverUrl={portfolio.cover_url}
-                              alt={portfolio.title}
-                              sizes="(max-width: 640px) 100vw, 50vw"
-                              imageClassName="transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
-                              <Images className="h-12 w-12 text-gray-400/60" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-                          <div className="absolute bottom-0 left-0 right-0 p-4">
-                            <h3 className="text-base font-semibold text-white truncate">{portfolio.title}</h3>
+                          <div className="relative aspect-[2/1] sm:aspect-[3/2] overflow-hidden">
+                            {portfolio.cover_url ? (
+                              <CoverCollage
+                                coverUrl={portfolio.cover_url}
+                                alt={portfolio.title}
+                                sizes="(max-width: 640px) 100vw, 50vw"
+                                imageClassName="transition-transform duration-500 group-hover:scale-105"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+                                <Images className="h-12 w-12 text-gray-400/60" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                            <h3 className="text-sm sm:text-base font-semibold text-white truncate">{portfolio.title}</h3>
                             {portfolio.description && (
                               <p className="description-clamp mt-0.5 line-clamp-1 text-xs text-white/70">{portfolio.description}</p>
                             )}
-                            <div className="mt-2 flex items-center gap-3 text-[11px] text-white/60">
+                            <div className="mt-1.5 sm:mt-2 flex items-center gap-3 text-[11px] text-white/60">
                               <span className="flex items-center gap-1">
                                 <Images className="h-3 w-3" /> {portfolio.photo_count || 0}
                               </span>
@@ -198,7 +200,7 @@ export function UserProfileClient({
                       <p className="text-sm text-gray-400">暂无公开照片</p>
                     </div>
                   ) : (
-                    <div className="columns-2 lg:columns-3 gap-2 sm:gap-3 space-y-2 sm:space-y-3">
+                    <div className="columns-1 sm:columns-2 lg:columns-3 gap-2 sm:gap-3 space-y-2 sm:space-y-3">
                       {sortedPhotos.map((photo) => (
                         <div key={photo.id} className="break-inside-avoid">
                           <PhotoCard photo={photo} hideAuthor mobileStatsOnly />

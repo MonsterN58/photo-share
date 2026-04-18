@@ -24,9 +24,11 @@ function getCacheKey(sort?: string, query?: string, userId?: string) {
 
 function useColumnCount() {
   const [count, setCount] = useState(0); // 0 = SSR/unmounted, measured after mount
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
+      setIsSmallScreen(w < 640);
       if (w < 640) setCount(1);
       else if (w < 1024) setCount(2);
       else if (w < 1536) setCount(3);
@@ -36,7 +38,7 @@ function useColumnCount() {
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
-  return count;
+  return { count, isSmallScreen };
 }
 
 function distributeToColumns(photos: Photo[], numColumns: number): Photo[][] {
@@ -75,7 +77,7 @@ export function MasonryGrid({ initialPhotos, query, sort, userId }: MasonryGridP
   const [hasMore, setHasMore] = useState(cached !== undefined ? cached.hasMore : initialPhotos.length >= PAGE_SIZE);
   const [page, setPage] = useState(cached?.page ?? 1);
   const observerRef = useRef<HTMLDivElement>(null);
-  const numColumns = useColumnCount();
+  const { count: numColumns, isSmallScreen } = useColumnCount();
   const columns = useMemo(() => distributeToColumns(photos, numColumns), [photos, numColumns]);
 
   // Keep cache in sync with state changes
@@ -156,23 +158,23 @@ export function MasonryGrid({ initialPhotos, query, sort, userId }: MasonryGridP
 
   return (
     <>
-      <div className="flex sm:gap-3 items-start">
+      <div className="flex gap-0 sm:gap-3 items-start">
         {columns.map((colPhotos, colIdx) => (
-          <div key={colIdx} className="flex-1 flex flex-col sm:gap-3 min-w-0">
+          <div key={colIdx} className="flex-1 flex flex-col gap-0 sm:gap-3 min-w-0">
             {colPhotos.map((photo) => (
               <div key={photo.id}>
-                <PhotoCard photo={photo} />
+                <PhotoCard photo={photo} mobileStatsOnly={isSmallScreen} hideAuthor={false} />
               </div>
             ))}
           </div>
         ))}
         {loading &&
           Array.from({ length: numColumns }).map((_, colIdx) => (
-            <div key={`skel-col-${colIdx}`} className="flex-1 flex flex-col sm:gap-3 min-w-0">
+            <div key={`skel-col-${colIdx}`} className="flex-1 flex flex-col gap-2 sm:gap-3 min-w-0">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={`skeleton-${colIdx}-${i}`}
-                  className="w-full sm:rounded-lg bg-gray-100 animate-pulse"
+                  className="w-full rounded-lg bg-gray-100 animate-pulse"
                   style={{ height: `${160 + ((colIdx * 3 + i) % 5) * 50}px` }}
                 />
               ))}

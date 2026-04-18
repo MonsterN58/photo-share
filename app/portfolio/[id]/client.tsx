@@ -22,7 +22,7 @@ export function PortfolioDetail({ portfolio, photos }: PortfolioDetailProps) {
   return (
     <div className="min-h-screen">
       {/* Hero cover */}
-      <div className="relative w-full aspect-[21/9] sm:aspect-[3/1] overflow-hidden bg-gray-100">
+      <div className="relative w-full aspect-[16/9] sm:aspect-[3/1] overflow-hidden bg-gray-100">
         {portfolio.cover_url ? (
           <CoverCollage
             coverUrl={portfolio.cover_url}
@@ -102,17 +102,17 @@ export function PortfolioDetail({ portfolio, photos }: PortfolioDetailProps) {
       </div>
 
       {/* Photos grid */}
-      <div className="mx-auto max-w-5xl px-4 sm:px-8 py-8">
+      <div className="mx-auto max-w-5xl px-3 sm:px-8 py-6 sm:py-8">
         {photos.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 py-24 text-center">
             <BookImage className="mx-auto mb-3 h-12 w-12 text-gray-200" />
             <p className="text-sm text-gray-400">作品集中暂无照片</p>
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-2.5 sm:gap-4 space-y-2.5 sm:space-y-4">
             {photos.map((photo) => (
               <div key={photo.id} className="break-inside-avoid">
-                <PhotoCard photo={photo} hideAuthor />
+                <PhotoCard photo={photo} hideAuthor mobileStatsOnly />
               </div>
             ))}
           </div>

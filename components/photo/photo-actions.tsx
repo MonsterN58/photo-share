@@ -76,7 +76,7 @@ export function PhotoActions({
         variant={liked ? "default" : "outline"}
         onClick={handleLike}
         disabled={isPending}
-        className={`${liked ? "bg-red-500 hover:bg-red-600 border-red-500 text-white" : ""} ${animating ? "animate-like-burst" : ""}`}
+        className={`transition-transform active:scale-90 ${liked ? "bg-red-500 hover:bg-red-600 border-red-500 text-white" : ""} ${animating ? "animate-like-burst" : ""}`}
       >
         <Heart className={`h-4 w-4 transition-all ${liked ? "fill-current" : ""} ${animating ? "animate-like-pop" : ""}`} />
         {likes}
@@ -87,6 +87,7 @@ export function PhotoActions({
           variant="outline"
           onClick={handleDownload}
           disabled={downloading}
+          className="active:scale-95 transition-transform"
         >
           {downloading ? (
             <Loader2 className="h-4 w-4 animate-spin" />

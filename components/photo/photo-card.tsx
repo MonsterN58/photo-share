@@ -152,14 +152,17 @@ export function PhotoCard({ photo, trackViews = true, hideAuthor = false, mobile
   };
 
   return (
-    <article ref={cardRef} className="group/card bg-white sm:bg-transparent overflow-hidden sm:rounded-xl">
+    <article ref={cardRef} className="group/card bg-white sm:bg-transparent overflow-hidden sm:rounded-xl border-b border-gray-100 sm:border-b-0">
       {!hideAuthor && (<div className="flex items-center gap-2.5 px-3 py-2 sm:hidden">
         <MiniAvatar username={username} avatarUrl={avatarUrl} userId={userId} size={30} />
         <Link href={`/user/${userId}`} className="text-sm font-medium text-gray-900 truncate hover:underline">{username}</Link>
       </div>)}
 
       <div className="relative overflow-hidden bg-gray-100 sm:rounded-xl">
-        <Link href={`/photo/${photo.id}`} className="block">
+        <Link href={`/photo/${photo.id}`} className="block" onClick={() => {
+          // Save scroll position for back navigation
+          try { sessionStorage.setItem("photo-share-scroll-pos", String(window.scrollY)); } catch {}
+        }}>
           <div
             style={{ paddingBottom: `${aspectRatio * 100}%` }}
             className="relative w-full"
@@ -168,7 +171,7 @@ export function PhotoCard({ photo, trackViews = true, hideAuthor = false, mobile
               src={photo.url}
               alt={photo.title}
               fill
-              className={`object-cover transition-all duration-500 group-hover/card:scale-[1.03] photo-protected ${
+              className={`object-cover transition-all duration-500 sm:group-hover/card:scale-[1.03] photo-protected ${
                 loaded ? "opacity-100" : "opacity-0"
               }`}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
@@ -180,12 +183,6 @@ export function PhotoCard({ photo, trackViews = true, hideAuthor = false, mobile
             {siteConfig.antiScreenshotEnabled && <DynamicWatermark title={photo.title} />}
             {!loaded && (
               <div className="absolute inset-0 bg-gray-100 animate-pulse" />
-            )}
-            {mobileStatsOnly && (
-              <span className="absolute right-2 top-2 z-[3] inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-xs font-medium leading-none text-white backdrop-blur-sm sm:hidden">
-                <Heart className="h-3.5 w-3.5 fill-current" />
-                <span className="tabular-nums">{likes}</span>
-              </span>
             )}
           </div>
         </Link>
@@ -239,39 +236,68 @@ export function PhotoCard({ photo, trackViews = true, hideAuthor = false, mobile
         </div>
       </div>
 
-      {!mobileStatsOnly && (
-      <div className="sm:hidden flex items-center justify-between gap-2 px-3 py-2.5 border-b border-gray-50">
-        <p className="text-sm text-gray-800 truncate flex-1 font-medium">{photo.title}</p>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className={`h-8 gap-1 px-2.5 rounded-full transition-colors ${liked ? "text-red-500 bg-red-50" : "text-gray-500 hover:bg-gray-100"}`}
-            onClick={handleLike}
-            disabled={isPending}
-          >
-            <Heart className={`h-4 w-4 transition-all ${liked ? "fill-current" : ""} ${likeAnimating ? "animate-like-pop" : ""}`} />
-            <span className="text-xs tabular-nums">{likes}</span>
-          </Button>
-          {photo.allow_download !== false && (
-            <Button
+      {/* Mobile bottom bar: always show title + like + download on mobile */}
+      {mobileStatsOnly ? (
+        <div className="sm:hidden flex items-center justify-between gap-2 px-3 py-2">
+          <p className="text-[13px] text-gray-800 truncate flex-1 font-medium leading-snug">{photo.title}</p>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
               type="button"
-              size="sm"
-              className="h-8 rounded-full bg-gray-900 text-white hover:bg-gray-700 gap-1.5 px-3.5 text-xs shadow-sm"
-              onClick={handleDownload}
-              disabled={downloading}
+              className={`inline-flex items-center gap-1 text-xs font-medium transition-all active:scale-90 ${liked ? "text-red-500" : "text-gray-400"}`}
+              onClick={handleLike}
+              disabled={isPending}
             >
-              {downloading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Download className="h-3.5 w-3.5" />
-              )}
-              下载
-            </Button>
-          )}
+              <Heart className={`h-4 w-4 transition-all ${liked ? "fill-current" : ""} ${likeAnimating ? "animate-like-pop" : ""}`} />
+              <span className="tabular-nums">{likes}</span>
+            </button>
+            {photo.allow_download !== false && (
+              <button
+                type="button"
+                className="text-gray-400 active:text-gray-600 transition-colors"
+                onClick={handleDownload}
+                disabled={downloading}
+                aria-label="下载"
+              >
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="sm:hidden flex items-center justify-between gap-2 px-3 py-2.5 border-b border-gray-50">
+          <p className="text-sm text-gray-800 truncate flex-1 font-medium">{photo.title}</p>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              className={`inline-flex items-center gap-1 h-8 px-3 rounded-full text-xs font-medium transition-all active:scale-90 ${liked ? "text-red-500 bg-red-50" : "text-gray-500 bg-gray-50 active:bg-gray-100"}`}
+              onClick={handleLike}
+              disabled={isPending}
+            >
+              <Heart className={`h-4 w-4 transition-all ${liked ? "fill-current" : ""} ${likeAnimating ? "animate-like-pop" : ""}`} />
+              <span className="tabular-nums">{likes}</span>
+            </button>
+            {photo.allow_download !== false && (
+              <Button
+                type="button"
+                size="sm"
+                className="h-8 rounded-full bg-gray-900 text-white hover:bg-gray-700 gap-1.5 px-3.5 text-xs shadow-sm active:scale-95 transition-transform"
+                onClick={handleDownload}
+                disabled={downloading}
+              >
+                {downloading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Download className="h-3.5 w-3.5" />
+                )}
+                下载
+              </Button>
+            )}
+          </div>
+        </div>
       )}
     </article>
   );

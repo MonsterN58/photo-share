@@ -421,46 +421,48 @@ export function MyPhotosClient({
   const viewTitle = isAlbumView ? view.albumName : "我的照片";
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Profile header */}
-      <div className="flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4">
-        <label className="relative cursor-pointer shrink-0 group/av">
-          <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-200 ring-2 ring-gray-100">
-            {avatarUploading ? (
-              <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-              </div>
-            ) : avatarUrl ? (
-              <Image src={avatarUrl} alt="头像" width={64} height={64} className="object-cover h-full w-full" />
-            ) : (
-              <span className="flex h-full w-full items-center justify-center bg-gray-800 text-white text-xl font-bold">
-                {(initialProfile?.username || "U").charAt(0).toUpperCase()}
-              </span>
-            )}
+      <div className="rounded-xl border border-gray-100 bg-white p-4 sm:p-5">
+        {/* Mobile: vertical layout */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <label className="relative cursor-pointer shrink-0 group/av">
+            <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gray-200 ring-2 ring-gray-100">
+              {avatarUploading ? (
+                <div className="flex h-full w-full items-center justify-center bg-gray-100">
+                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                </div>
+              ) : avatarUrl ? (
+                <Image src={avatarUrl} alt="头像" width={64} height={64} className="object-cover h-full w-full" />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center bg-gray-800 text-white text-xl font-bold">
+                  {(initialProfile?.username || "U").charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="absolute inset-0 rounded-full bg-black/0 group-hover/av:bg-black/35 transition-all flex items-center justify-center">
+              <Camera className="h-5 w-5 text-white opacity-0 group-hover/av:opacity-100 transition-opacity" />
+            </div>
+            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
+          </label>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{initialProfile?.username || "我的主页"}</h1>
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+              {albums.length} 个相册 · {photos.length} 张照片
+            </p>
           </div>
-          <div className="absolute inset-0 rounded-full bg-black/0 group-hover/av:bg-black/35 transition-all flex items-center justify-center">
-            <Camera className="h-5 w-5 text-white opacity-0 group-hover/av:opacity-100 transition-opacity" />
-          </div>
-          <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
-        </label>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold text-gray-900">{initialProfile?.username || "我的主页"}</h1>
+          <div className="flex items-center gap-1.5 shrink-0">
             <Link href={`/user/${initialProfile?.id}`}>
-              <Button variant="ghost" size="sm" className="h-7 px-2 text-gray-400 hover:text-gray-700 text-xs gap-1">
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1 rounded-full">
                 <ExternalLink className="h-3 w-3" />
-                查看主页
+                <span className="hidden sm:inline">查看主页</span>
               </Button>
             </Link>
+            <EditProfileDialog profile={initialProfile} />
           </div>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {albums.length} 个相册 · {photos.length} 张照片
-          </p>
-          <p className="text-xs text-gray-400 mt-1">点击头像可更换</p>
         </div>
-        <EditProfileDialog profile={initialProfile} />
       </div>
-      <div className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:gap-3 rounded-xl border border-gray-100 bg-white p-2.5 sm:p-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           {isAlbumView ? (
             <>
@@ -474,15 +476,14 @@ export function MyPhotosClient({
                 }}
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                我的照片
+                返回
               </Button>
               <span className="text-gray-300">/</span>
             </>
           ) : (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
               <Images className="h-4 w-4" />
-              <span className="hidden sm:inline">拖动照片到相册或框选多张，拖向另一张可创建新相册</span>
-              <span className="sm:hidden">长按照片拖动到相册，或拖向另一张创建新相册</span>
+              <span>拖动照片到相册或框选多张，拖向另一张可创建新相册</span>
             </div>
           )}
           <span className="text-sm font-medium text-gray-800">{viewTitle}</span>
@@ -589,7 +590,7 @@ export function MyPhotosClient({
           ))}
         </div>
       ) : (
-        <div ref={gridRef} className="relative grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 select-none">
+        <div ref={gridRef} className="relative grid grid-cols-1 items-start gap-2.5 sm:gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 select-none">
           {selectionRect && (
             <div
               className="absolute z-30 border-2 border-blue-400 bg-blue-400/10 rounded pointer-events-none"
@@ -780,8 +781,8 @@ function AlbumCollectionTile({
   return (
     <div
       data-album-id={album.id}
-      className={`group relative overflow-hidden rounded-lg border bg-gray-100 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-        isDropTarget ? "border-gray-900 ring-2 ring-gray-900/10" : "border-gray-100 hover:border-gray-200"
+      className={`group relative overflow-hidden rounded-lg border bg-gray-100 shadow-sm transition sm:hover:-translate-y-0.5 sm:hover:shadow-md ${
+        isDropTarget ? "border-gray-900 ring-2 ring-gray-900/10" : "border-gray-100 sm:hover:border-gray-200"
       }`}
       onDragOver={(event) => {
         if (!canDrop || isPending) return;
@@ -807,7 +808,7 @@ function AlbumCollectionTile({
         className={`absolute left-2 top-2 z-20 flex h-7 w-7 items-center justify-center rounded-md border text-xs transition-all ${
           fullySelected
             ? "border-gray-900 bg-gray-900 text-white opacity-100"
-            : "border-white/70 bg-white/85 text-gray-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 hover:text-gray-900"
+            : "border-white/70 bg-white/85 text-gray-500 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 hover:text-gray-900"
         }`}
         aria-label={fullySelected ? "取消选择相册照片" : "选择相册照片"}
       >
@@ -831,11 +832,11 @@ function AlbumCollectionTile({
             urls={previews.map((photo) => photo.url)}
             alt={album.name}
             sizes="(max-width: 640px) 50vw, 25vw"
-            imageClassName="transition-transform duration-300 group-hover:scale-[1.02]"
+            imageClassName="transition-transform duration-300 sm:group-hover:scale-[1.02]"
           />
-          <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/65 via-black/20 to-transparent p-3">
-            <p className="truncate text-sm font-semibold text-white">{album.name}</p>
-            <div className="mt-2 flex items-end justify-between gap-3">
+          <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/75 via-black/30 to-transparent p-3 pt-8">
+            <p className="line-clamp-2 text-sm font-semibold text-white leading-tight">{album.name}</p>
+            <div className="mt-1.5 flex items-end justify-between gap-2">
               <div className="min-w-0 text-xs text-white/75">
                 <p className="truncate">{album.description || "相册"}</p>
                 <p className="mt-0.5">
@@ -845,7 +846,8 @@ function AlbumCollectionTile({
                   })}
                 </p>
               </div>
-              <div className="flex shrink-0 items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+              {/* 桌面端：悬浮显示的独立按钮 */}
+              <div className="hidden sm:flex shrink-0 items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                 {portfolio && (
                   <Button
                     type="button"
@@ -884,6 +886,49 @@ function AlbumCollectionTile({
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
+              {/* 手机端：常驻可见的 "..." 菜单 */}
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <button
+                      type="button"
+                      onClick={(e) => e.stopPropagation()}
+                      className="sm:hidden flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-white active:bg-black/65"
+                      aria-label="更多操作"
+                    />
+                  }
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem
+                    onClick={(e) => { e.stopPropagation(); onPublish(); }}
+                    disabled={isPending}
+                    className="gap-2"
+                  >
+                    <BookImage className="h-4 w-4 text-blue-500" />
+                    {portfolio ? "已发布为作品集" : "发布为作品集"}
+                  </DropdownMenuItem>
+                  {portfolio && (
+                    <DropdownMenuItem
+                      onClick={(e) => { e.stopPropagation(); openCoverPicker(); }}
+                      disabled={isPending || photos.length === 0}
+                      className="gap-2"
+                    >
+                      <ImageIcon className="h-4 w-4 text-purple-500" />
+                      更换封面
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    disabled={isPending}
+                    className="gap-2 text-red-500 focus:text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    删除相册
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           {canDrop && (
@@ -897,87 +942,6 @@ function AlbumCollectionTile({
               </span>
             </div>
           )}
-        </div>
-        <div className="hidden">
-          <span className="hidden">{album.description || "相册"}</span>
-          <div className="flex items-center gap-1">
-            {/* Desktop hover buttons */}
-            {portfolio && (
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); openCoverPicker(); }}
-                disabled={isPending || photos.length === 0}
-                className="hidden h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-500 opacity-0 shadow-sm transition-opacity hover:bg-white hover:text-purple-500 group-hover:opacity-100 group-focus-within:opacity-100 sm:flex"
-                aria-label="更换作品集封面"
-                title="更换作品集封面"
-              >
-                <ImageIcon className="h-3.5 w-3.5" />
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onPublish(); }}
-              disabled={isPending}
-              className="hidden h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-500 opacity-0 shadow-sm transition-opacity hover:bg-white hover:text-blue-500 group-hover:opacity-100 group-focus-within:opacity-100 sm:flex"
-              aria-label="发布为作品集"
-              title="发布为作品集"
-            >
-              <BookImage className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onDelete(); }}
-              disabled={isPending}
-              className="hidden h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-500 opacity-0 shadow-sm transition-opacity hover:bg-white hover:text-red-500 group-hover:opacity-100 group-focus-within:opacity-100 sm:flex"
-              aria-label="删除相册"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-            {/* Mobile: always-visible "..." menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <button
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-500 shadow-sm transition-colors hover:bg-white hover:text-gray-900 sm:hidden"
-                    aria-label="更多操作"
-                  />
-                }
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                <DropdownMenuItem
-                  onClick={(e) => { e.stopPropagation(); onPublish(); }}
-                  disabled={isPending}
-                  className="gap-2"
-                >
-                  <BookImage className="h-4 w-4 text-blue-500" />
-                  {portfolio ? "已发布为作品集" : "发布为作品集"}
-                </DropdownMenuItem>
-                {portfolio && (
-                  <DropdownMenuItem
-                    onClick={(e) => { e.stopPropagation(); openCoverPicker(); }}
-                    disabled={isPending || photos.length === 0}
-                    className="gap-2"
-                  >
-                    <ImageIcon className="h-4 w-4 text-purple-500" />
-                    更换封面
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                  disabled={isPending}
-                  className="gap-2 text-red-500 focus:text-red-500"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  删除相册
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <AlbumIcon className="hidden h-3.5 w-3.5 shrink-0 text-gray-300" />
-          </div>
         </div>
       </div>
 
@@ -1018,7 +982,7 @@ function AlbumCollectionTile({
                         src={photo.url}
                         alt={photo.title}
                         fill
-                        className="photo-protected object-cover transition-transform duration-200 group-hover:scale-105"
+                        className="photo-protected object-cover transition-transform duration-200 sm:group-hover:scale-105"
                         sizes="(max-width: 640px) 33vw, 180px"
                         unoptimized={shouldBypassImageOptimization(photo.url)}
                         draggable={false}
@@ -1031,9 +995,9 @@ function AlbumCollectionTile({
                           </div>
                         </div>
                       ) : (
-                        <div className="absolute inset-0 flex items-end justify-center bg-transparent pb-2 transition-colors group-hover:bg-black/25">
+                        <div className="absolute inset-0 flex items-end justify-center bg-transparent pb-2 transition-colors sm:group-hover:bg-black/25">
                           <span
-                            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
+                            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-white opacity-0 transition-opacity sm:group-hover:opacity-100"
                             style={{ background: "rgba(0,0,0,.45)" }}
                           >
                             设为封面
@@ -1105,6 +1069,7 @@ function PhotoTile({
 }) {
   const touchStartRef = useRef<{ x: number; y: number; timer: ReturnType<typeof setTimeout> | null }>({ x: 0, y: 0, timer: null });
   const [touchDragging, setTouchDragging] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isPending) return;
@@ -1182,8 +1147,8 @@ function PhotoTile({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`group relative self-start overflow-hidden rounded-lg border bg-gray-100 transition-all ${
-        selected ? "border-gray-900 ring-2 ring-gray-900/20" : isPhotoDropTarget ? "border-blue-400 ring-2 ring-blue-400/20" : "border-gray-100"
+      className={`group relative self-start overflow-hidden rounded-xl border shadow-sm transition-all ${
+        selected ? "border-gray-900 ring-2 ring-gray-900/20" : isPhotoDropTarget ? "border-blue-400 ring-2 ring-blue-400/20" : "border-gray-100 hover:shadow-md"
       } ${isDragging || touchDragging ? "scale-[0.95] opacity-60 z-50" : ""}`}
     >
       <Link href={`/photo/${photo.id}`} className="block">
@@ -1192,7 +1157,7 @@ function PhotoTile({
             src={photo.url}
             alt={photo.title}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            className="object-cover transition-transform duration-300 sm:group-hover:scale-[1.02]"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             unoptimized={shouldBypassImageOptimization(photo.url)}
           />
@@ -1208,6 +1173,16 @@ function PhotoTile({
               </span>
             </div>
           )}
+
+          {/* Mobile: overlay info on image, same style as album tiles */}
+          <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/75 via-black/30 to-transparent p-3 pt-8 sm:hidden">
+            <p className="line-clamp-1 text-sm font-semibold text-white leading-tight">{photo.title}</p>
+            <div className="mt-1 flex items-center gap-2 text-[11px] text-white/70">
+              <span>{photo.is_public ? "公开" : "私密"}</span>
+              <span>·</span>
+              <span className="truncate">{photo.albums?.name || "未归类"}</span>
+            </div>
+          </div>
         </div>
       </Link>
 
@@ -1217,16 +1192,56 @@ function PhotoTile({
         className={`absolute left-2 top-2 z-20 flex h-7 w-7 items-center justify-center rounded-md border text-xs transition-all ${
           selected
             ? "border-gray-900 bg-gray-900 text-white opacity-100"
-            : "border-white/70 bg-white/85 text-gray-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 hover:text-gray-900"
+            : "border-white/70 bg-white/85 text-gray-500 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 hover:text-gray-900"
         }`}
         aria-label={selected ? "取消选择照片" : "选择照片"}
       >
         {selected && <Check className="h-4 w-4" />}
       </button>
 
+      {/* Mobile: "..." menu button in bottom-right corner */}
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <button
+              type="button"
+              onClick={(e) => e.stopPropagation()}
+              className="sm:hidden absolute right-2 bottom-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-white active:bg-black/65"
+              aria-label="更多操作"
+            />
+          }
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuItem
+            onClick={(e) => { e.stopPropagation(); window.location.href = `/photo/${photo.id}`; }}
+            className="gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            查看照片
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => { e.stopPropagation(); setEditDialogOpen(true); }}
+            className="gap-2"
+          >
+            <Pencil className="h-4 w-4" />
+            编辑
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            disabled={isPending}
+            className="gap-2 text-red-500 focus:text-red-500"
+          >
+            <Trash2 className="h-4 w-4" />
+            删除
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <div
-        className={`absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/80 via-black/45 to-transparent p-3 text-white transition-opacity ${
-          "pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
+        className={`absolute inset-x-0 bottom-0 z-10 hidden bg-gradient-to-t from-black/80 via-black/45 to-transparent p-3 text-white transition-opacity sm:block ${
+          "pointer-events-none opacity-0 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100 sm:group-focus-within:pointer-events-auto sm:group-focus-within:opacity-100"
         }`}
       >
         <div className="space-y-2">
@@ -1266,7 +1281,14 @@ function PhotoTile({
                 className="h-7 bg-white/12 px-2 text-white hover:bg-white/20 hover:text-white"
                 iconOnly
               />
-              <EditDialog photo={photo} onSave={onSave} />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 bg-white/12 px-2 text-white hover:bg-white/20 hover:text-white"
+                onClick={() => setEditDialogOpen(true)}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1289,6 +1311,13 @@ function PhotoTile({
           </div>
         </div>
       </div>
+
+      <EditDialog
+        photo={photo}
+        onSave={onSave}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </div>
   );
 }
@@ -1365,11 +1394,18 @@ function CreateAlbumDialog({
 function EditDialog({
   photo,
   onSave,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: {
   photo: Photo;
   onSave: (id: string, formData: FormData) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = externalOpen !== undefined;
+  const open = isControlled ? externalOpen : internalOpen;
+  const setOpen = isControlled ? (externalOnOpenChange ?? setInternalOpen) : setInternalOpen;
   const [title, setTitle] = useState(photo.title);
   const [description, setDescription] = useState(photo.description || "");
   const [isPublic, setIsPublic] = useState(photo.is_public);
@@ -1387,17 +1423,19 @@ function EditDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 bg-white/12 px-2 text-white hover:bg-white/20 hover:text-white"
-          />
-        }
-      >
-        <Pencil className="h-3.5 w-3.5" />
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 bg-white/12 px-2 text-white hover:bg-white/20 hover:text-white"
+            />
+          }
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>编辑照片</DialogTitle>
