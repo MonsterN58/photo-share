@@ -79,6 +79,8 @@ export function CommentSection({
       if (result.error) {
         removeOptimistic(optimisticId);
         toast.error(result.error);
+      } else if (result.comment) {
+        updateOptimistic(optimisticId, result.comment);
       }
     });
   };

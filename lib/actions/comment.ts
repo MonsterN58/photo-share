@@ -6,6 +6,7 @@ import { getDatabaseMode } from "@/lib/database-mode";
 import {
   deleteCommentByOwner,
   getComment,
+  getCommentWithProfile,
   insertComment,
   insertNotification,
   likeCommentOnce,
@@ -14,6 +15,7 @@ import {
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import { commentSchema } from "@/lib/validators";
 import { getPhotoByIdForMode } from "@/lib/db-read";
+import type { Comment } from "@/types";
 
 export async function addComment(photoId: string, formData: FormData) {
   const user = await getCurrentUser();
@@ -27,6 +29,8 @@ export async function addComment(photoId: string, formData: FormData) {
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
+
+  let comment: Comment | null = null;
 
   if (getDatabaseMode() === "remote") {
     const supabase = await createSupabaseClient();
@@ -44,14 +48,15 @@ export async function addComment(photoId: string, formData: FormData) {
       }
     }
 
-    const { error } = await supabase.from("comments").insert({
+    const { data, error } = await supabase.from("comments").insert({
       photo_id: photoId,
       user_id: user.id,
       content: parsed.data.content,
       parent_id: parsed.data.parent_id || null,
-    });
+    }).select("*, profiles(*)").single();
 
     if (error) return { error: error.message };
+    comment = data as Comment;
 
     // Create notification for photo owner (remote)
     const photo = await getPhotoByIdForMode(photoId);
@@ -71,12 +76,13 @@ export async function addComment(photoId: string, formData: FormData) {
       }
     }
 
-    insertComment({
+    const commentId = insertComment({
       photoId,
       userId: user.id,
       content: parsed.data.content,
       parentId: parsed.data.parent_id || null,
     });
+    comment = getCommentWithProfile(commentId) || null;
 
     // Create notification for photo owner (local)
     const { getPhotoById } = await import("@/lib/local-db");
@@ -93,7 +99,7 @@ export async function addComment(photoId: string, formData: FormData) {
   }
 
   revalidatePath(`/photo/${photoId}`);
-  return { success: true };
+  return { success: true, comment };
 }
 
 export async function deleteComment(commentId: string, photoId: string) {

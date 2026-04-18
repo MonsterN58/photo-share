@@ -554,6 +554,24 @@ export function insertComment(input: {
   return id;
 }
 
+export function getCommentWithProfile(commentId: string) {
+  const row = getDb()
+    .prepare(
+      `select
+         c.*,
+         pr.id as profile_id,
+         pr.username as profile_username,
+         pr.avatar_url as profile_avatar_url,
+         pr.bio as profile_bio,
+         pr.created_at as profile_created_at
+       from comments c
+       left join profiles pr on pr.id = c.user_id
+       where c.id = ?`
+    )
+    .get(commentId) as CommentRow | undefined;
+  return row ? toComment(row) : undefined;
+}
+
 export function getComment(commentId: string) {
   return getDb()
     .prepare("select id, photo_id, user_id from comments where id = ?")
