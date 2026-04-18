@@ -25,6 +25,7 @@ export default async function UserPage({ params }: UserPageProps) {
 
   return (
     <UserProfileClient
+      key={id}
       profile={profile}
       stats={stats}
       photos={photos}

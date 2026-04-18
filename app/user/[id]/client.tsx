@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Eye, Heart, Images, Camera, BookImage } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,10 @@ interface UserProfileClientProps {
   portfolios: Portfolio[];
 }
 
+function sortPhotosByLikes(photos: Photo[]) {
+  return [...photos].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+}
+
 export function UserProfileClient({
   profile,
   stats,
@@ -24,10 +28,20 @@ export function UserProfileClient({
   portfolios,
 }: UserProfileClientProps) {
   const [tab, setTab] = useState(portfolios.length > 0 ? "portfolios" : "photos");
+  const [initialPhotoOrder] = useState(() => sortPhotosByLikes(photos).map((photo) => photo.id));
   const publicPortfolios = portfolios
     .filter((p) => p.is_public)
     .sort((a, b) => (b.total_likes || 0) - (a.total_likes || 0));
-  const sortedPhotos = [...photos].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+  const photosById = useMemo(() => new Map(photos.map((photo) => [photo.id, photo])), [photos]);
+  const sortedPhotos = useMemo(() => {
+    const initialPhotoIds = new Set(initialPhotoOrder);
+    const orderedPhotos = initialPhotoOrder
+      .map((id) => photosById.get(id))
+      .filter((photo): photo is Photo => Boolean(photo));
+    const newPhotos = sortPhotosByLikes(photos.filter((photo) => !initialPhotoIds.has(photo.id)));
+
+    return [...orderedPhotos, ...newPhotos];
+  }, [initialPhotoOrder, photos, photosById]);
 
   return (
     <div className="min-h-screen bg-gray-50/50">
