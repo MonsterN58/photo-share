@@ -1,1 +1,58 @@
-⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[TypeError: fetch failed] {
+  [cause]: Error: Client network socket disconnected before secure TLS connection was established
+      at ignore-listed frames {
+    code: 'ECONNRESET',
+    path: undefined,
+    host: 'gitee.com',
+    port: 443,
+    localAddress: null
+  }
+}
+⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/2599ce10-6488-4f7b-8464-8bc512cde6d3.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/5839f31b-aa5b-4a54-b9da-a6ad358332d1.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+[TypeError: fetch failed] {
+  [cause]: Error: Client network socket disconnected before secure TLS connection was established
+      at ignore-listed frames {
+    code: 'ECONNRESET',
+    path: undefined,
+    host: 'gitee.com',
+    port: 443,
+    localAddress: null
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: Client network socket disconnected before secure TLS connection was established
+      at ignore-listed frames {
+    code: 'ECONNRESET',
+    path: undefined,
+    host: 'gitee.com',
+    port: 443,
+    localAddress: null
+  }
+}
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/6be62483-eb94-4163-be10-6eafdc9a90ae.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/dbe443ae-af92-4d5e-be6b-ef45b9c4ebcc.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/dbe443ae-af92-4d5e-be6b-ef45b9c4ebcc.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/8edeea4a-e9d6-4a40-a1fb-df5b86d61923.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/0a640e5a-5d7d-4f53-93b7-4b4189cea79f.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/bf4991f6-1ac5-4309-8466-9c8bb33160a2.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/32ecd4dc-a519-4ed1-b906-6cd273b8fbff.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+[browser] Image with src "https://gitee.com/monstern/picture/raw/master/uploads/2026/04/4bc12afe-dffa-4d91-abe7-8cefba76142d.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://D:/AIcode项目/盐选/photo-share/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2442:13)
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload

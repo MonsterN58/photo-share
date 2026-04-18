@@ -287,3 +287,52 @@ img.photo-protected {
     watermark-breathe 4.8s ease-in-out infinite;
   will-change: transform, opacity;
 }
+
+/* ── Honor / WebKit mobile browser adaptations ─────────────────────────── */
+
+/* Safe area padding for notch/rounded corners */
+.sticky {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Prevent Honor browser from overscrolling the page when in fullscreen */
+:-webkit-full-screen {
+  overflow: hidden;
+}
+
+/* Smooth scrolling on WebKit mobile */
+@supports (-webkit-overflow-scrolling: touch) {
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Fix webkit tap highlight on Honor browser */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Backdrop blur fallback for older WebKit engines */
+.backdrop-blur-2xl {
+  -webkit-backdrop-filter: blur(40px);
+}
+
+/* Fix columns layout on WebKit mobile (Honor browser can sometimes break masonry) */
+@supports not (columns: 2) {
+  .columns-2,
+  .columns-3 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .columns-2 > *,
+  .columns-3 > * {
+    flex: 1 1 calc(50% - 0.375rem);
+  }
+}
+
+/* Fix fullscreen for Honor browser — webkit prefix fallback */
+::-webkit-full-page-media {
+  display: none;
+}

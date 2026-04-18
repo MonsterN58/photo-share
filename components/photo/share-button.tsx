@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
-import { Link as LinkIcon, QrCode, Share2 } from "lucide-react";
+import { Check, Link as LinkIcon, Loader2, QrCode, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,10 +32,32 @@ export function ShareButton({
 }: ShareButtonProps) {
   const [open, setOpen] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const shareUrl =
+  const [shortUrl, setShortUrl] = useState<string | null>(null);
+  const [loadingShort, setLoadingShort] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const longUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/photo/${photoId}`
       : `/photo/${photoId}`;
+
+  const shareUrl = shortUrl || longUrl;
+
+  useEffect(() => {
+    if (!open) return;
+
+    // Fetch short URL
+    setLoadingShort(true);
+    fetch("/api/shorten", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ photoId }),
+    })
+      .then((r) => r.json())
+      .then((data) => { if (data.url) setShortUrl(data.url); })
+      .catch(() => {})
+      .finally(() => setLoadingShort(false));
+  }, [open, photoId]);
 
   useEffect(() => {
     if (open && canvasRef.current) {
@@ -49,6 +71,8 @@ export function ShareButton({
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
     toast.success("链接已复制");
   };
 
@@ -74,16 +98,34 @@ export function ShareButton({
         <div className="space-y-4">
           <p className="truncate text-sm text-gray-500">{title}</p>
 
-          <div className="flex items-center gap-2">
-            <input
-              readOnly
-              value={shareUrl}
-              className="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600"
-            />
-            <Button size="sm" onClick={copyLink} className="gap-1.5 shrink-0">
-              <LinkIcon className="h-4 w-4" />
-              复制
-            </Button>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <input
+                  readOnly
+                  value={loadingShort ? "生成短链中…" : shareUrl}
+                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 pr-8"
+                />
+                {loadingShort && (
+                  <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
+                )}
+              </div>
+              <Button
+                size="sm"
+                onClick={copyLink}
+                className="gap-1.5 shrink-0"
+                disabled={loadingShort}
+              >
+                {copied ? <Check className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+                {copied ? "已复制" : "复制"}
+              </Button>
+            </div>
+            {shortUrl && (
+              <p className="text-xs text-gray-400 flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-full bg-green-400" />
+                已生成短链接，更简洁易分享
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col items-center gap-3 pt-2">

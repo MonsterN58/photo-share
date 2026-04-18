@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadPhoto } from "@/lib/actions/photo";
+import { createAlbum, assignPhotosToAlbum } from "@/lib/actions/album";
+import { publishPortfolio } from "@/lib/actions/portfolio";
+import { serializeCoverUrls } from "@/lib/cover";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
@@ -110,6 +113,10 @@ export function UploadForm() {
     setUploadProgress(0);
 
     let successCount = 0;
+    const uploadedPhotoIds: string[] = [];
+    const uploadedPhotoUrls: string[] = [];
+    let firstPhotoUrl: string | null = null;
+
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
       const formData = new FormData();
@@ -126,9 +133,48 @@ export function UploadForm() {
         toast.error(`上传失败: ${result.error}`);
       } else {
         successCount++;
+        if (result.photoId) {
+          uploadedPhotoIds.push(result.photoId);
+        }
+        if (result.url) {
+          uploadedPhotoUrls.push(result.url);
+        }
+        if (firstPhotoUrl === null && result.url) {
+          firstPhotoUrl = result.url;
+        }
       }
 
       setUploadProgress(Math.round(((i + 1) / files.length) * 100));
+    }
+
+    // If multiple photos uploaded successfully, auto-create album + portfolio
+    if (successCount > 1 && uploadedPhotoIds.length > 1) {
+      try {
+        const albumFormData = new FormData();
+        albumFormData.set("name", title);
+        albumFormData.set("description", description || "");
+        const albumResult = await createAlbum(albumFormData);
+        if (albumResult.success && albumResult.album) {
+          await assignPhotosToAlbum(uploadedPhotoIds, albumResult.album.id);
+
+          // Also create a portfolio from the album
+          const portfolioFormData = new FormData();
+          portfolioFormData.set("album_id", albumResult.album.id);
+          portfolioFormData.set("title", title);
+          portfolioFormData.set("description", description || "");
+          portfolioFormData.set("cover_url", serializeCoverUrls(uploadedPhotoUrls.slice(0, 4)) || firstPhotoUrl || "");
+          portfolioFormData.set("is_public", String(isPublic));
+          const portfolioResult = await publishPortfolio(portfolioFormData);
+
+          if (portfolioResult.success) {
+            toast.success(`已自动创建作品集「${title}」`);
+          } else {
+            toast.success(`已自动创建相册「${title}」`);
+          }
+        }
+      } catch {
+        // Non-critical, don't fail the upload
+      }
     }
 
     setUploading(false);

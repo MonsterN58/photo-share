@@ -1,7 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
 import { getPublicPhotos } from "@/lib/data";
 import { MasonryGrid } from "@/components/photo/masonry-grid";
 import { FilterBar } from "@/components/photo/filter-bar";
+import { getCurrentUser } from "@/lib/auth-adapter";
+import { attachLikeState } from "@/lib/db-read";
 import type { Photo } from "@/types";
 import { Suspense } from "react";
 
@@ -16,26 +17,8 @@ export default async function HomePage({ searchParams }: HomeProps) {
   // Use cached query for public photos (no per-user data)
   let photos = await getPublicPhotos(sort);
 
-  // Merge per-user like state (non-cacheable, user-specific)
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user && photos.length > 0) {
-    const { data: likedRows } = await supabase
-      .from("photo_likes")
-      .select("photo_id")
-      .eq("user_id", user.id)
-      .in(
-        "photo_id",
-        photos.map((photo) => photo.id)
-      );
-    const likedIds = new Set(likedRows?.map((row) => row.photo_id as string) || []);
-    photos = photos.map((photo) => ({
-      ...photo,
-      has_liked: likedIds.has(photo.id),
-    })) as Photo[];
-  }
+  const user = await getCurrentUser();
+  photos = (await attachLikeState(photos, user?.id)) as Photo[];
 
   return (
     <section className="mx-auto max-w-[1800px] sm:px-3 lg:px-4 pt-0 sm:pt-4 pb-16">

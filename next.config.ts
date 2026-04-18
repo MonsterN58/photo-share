@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["better-sqlite3"],
   experimental: {
     serverActions: {
       bodySizeLimit: "25mb",
@@ -15,6 +16,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "cdn.jsdelivr.net",
+      },
+      {
+        protocol: "https",
+        hostname: "gitee.com",
       },
     ],
   },

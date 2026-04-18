@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useTransition } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { login, register } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [isRegister, setIsRegister] = useState(searchParams.get("tab") === "register");
   const [isPending, startTransition] = useTransition();
@@ -42,10 +43,17 @@ function LoginForm() {
         toast.error(result.error);
       }
 
-      if (result && "message" in result && result.message) {
+      if (result && "message" in result && typeof result.message === "string") {
         setMessage(result.message);
         toast.success(result.message);
       }
+
+      if (result && "success" in result && result.success) {
+        window.dispatchEvent(new Event("auth-changed"));
+        router.replace("/");
+        router.refresh();
+      }
+
     });
   };
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { Download, Heart, Loader2 } from "lucide-react";
 import { DynamicWatermark } from "@/components/photo/dynamic-watermark";
 import { ImageProtectionOverlay } from "@/components/photo/image-protection-overlay";
 import { Button } from "@/components/ui/button";
-import { incrementViews, likePhoto } from "@/lib/actions/photo";
+import { incrementViews, likePhoto, unlikePhoto } from "@/lib/actions/photo";
 import { downloadImageAsJpeg } from "@/lib/download-image";
 import { siteConfig } from "@/lib/site-config";
 import { toast } from "sonner";
@@ -16,6 +16,8 @@ import { toast } from "sonner";
 interface PhotoCardProps {
   photo: Photo;
   trackViews?: boolean;
+  hideAuthor?: boolean;
+  mobileStatsOnly?: boolean;
 }
 
 const viewedPhotoIds = new Set<string>();
@@ -23,13 +25,15 @@ const viewedPhotoIds = new Set<string>();
 function MiniAvatar({
   username,
   avatarUrl,
+  userId,
   size = 28,
 }: {
   username: string;
   avatarUrl?: string | null;
+  userId?: string;
   size?: number;
 }) {
-  return (
+  const content = (
     <div
       className="rounded-full overflow-hidden bg-gray-700 shrink-0 ring-1 ring-white/30 flex items-center justify-center"
       style={{ width: size, height: size }}
@@ -50,9 +54,18 @@ function MiniAvatar({
       )}
     </div>
   );
+
+  if (userId) {
+    return (
+      <Link href={`/user/${userId}`} onClick={(e) => e.stopPropagation()} className="hover:opacity-80 transition-opacity">
+        {content}
+      </Link>
+    );
+  }
+  return content;
 }
 
-export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
+export function PhotoCard({ photo, trackViews = true, hideAuthor = false, mobileStatsOnly = false }: PhotoCardProps) {
   const cardRef = useRef<HTMLElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [likes, setLikes] = useState(photo.likes || 0);
@@ -65,6 +78,7 @@ export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
 
   const username = photo.profiles?.username || "匿名";
   const avatarUrl = photo.profiles?.avatar_url;
+  const userId = photo.profiles?.id || photo.user_id;
 
   useEffect(() => {
     if (!trackViews || viewedPhotoIds.has(photo.id)) {
@@ -99,21 +113,30 @@ export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
 
   const handleLike = () => {
     if (liked) {
-      toast.info("你已经给这张照片点过赞了");
-      return;
+      setLikes((v) => Math.max(0, v - 1));
+      setLiked(false);
+      startTransition(async () => {
+        const result = await unlikePhoto(photo.id);
+        if (result.error) {
+          setLikes((v) => v + 1);
+          setLiked(true);
+          toast.error(result.error);
+        }
+      });
+    } else {
+      setLikes((v) => v + 1);
+      setLiked(true);
+      setLikeAnimating(true);
+      setTimeout(() => setLikeAnimating(false), 500);
+      startTransition(async () => {
+        const result = await likePhoto(photo.id);
+        if (result.error) {
+          setLikes((v) => Math.max(0, v - 1));
+          setLiked(false);
+          toast.error(result.error);
+        }
+      });
     }
-    setLikes((value) => value + 1);
-    setLiked(true);
-    setLikeAnimating(true);
-    setTimeout(() => setLikeAnimating(false), 500);
-    startTransition(async () => {
-      const result = await likePhoto(photo.id);
-      if (result.error) {
-        setLikes((value) => Math.max(0, value - 1));
-        setLiked(false);
-        toast.error(result.error);
-      }
-    });
   };
 
   const handleDownload = async () => {
@@ -129,10 +152,10 @@ export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
 
   return (
     <article ref={cardRef} className="group/card bg-white sm:bg-transparent overflow-hidden sm:rounded-xl">
-      <div className="flex items-center gap-2.5 px-3 py-2 sm:hidden">
-        <MiniAvatar username={username} avatarUrl={avatarUrl} size={30} />
-        <span className="text-sm font-medium text-gray-900 truncate">{username}</span>
-      </div>
+      {!hideAuthor && (<div className="flex items-center gap-2.5 px-3 py-2 sm:hidden">
+        <MiniAvatar username={username} avatarUrl={avatarUrl} userId={userId} size={30} />
+        <Link href={`/user/${userId}`} className="text-sm font-medium text-gray-900 truncate hover:underline">{username}</Link>
+      </div>)}
 
       <div className="relative overflow-hidden bg-gray-100 sm:rounded-xl">
         <Link href={`/photo/${photo.id}`} className="block">
@@ -155,6 +178,12 @@ export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
             {siteConfig.antiScreenshotEnabled && <DynamicWatermark title={photo.title} />}
             {!loaded && (
               <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+            )}
+            {mobileStatsOnly && (
+              <span className="absolute right-2 top-2 z-[3] inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-xs font-medium leading-none text-white backdrop-blur-sm sm:hidden">
+                <Heart className="h-3.5 w-3.5 fill-current" />
+                <span className="tabular-nums">{likes}</span>
+              </span>
             )}
           </div>
         </Link>
@@ -197,17 +226,18 @@ export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
           )}
 
           <div className="absolute bottom-0 left-0 right-0 p-3 text-white translate-y-1 opacity-0 group-hover/card:translate-y-0 group-hover/card:opacity-100 group-focus-within/card:translate-y-0 group-focus-within/card:opacity-100 transition-all duration-300 pointer-events-none">
-            <div className="flex items-center gap-2">
-              <MiniAvatar username={username} avatarUrl={avatarUrl} size={26} />
+            <div className="flex items-center gap-2 pointer-events-auto">
+              <MiniAvatar username={username} avatarUrl={avatarUrl} userId={userId} size={26} />
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate leading-tight">{photo.title}</p>
-                <p className="text-xs text-white/70 truncate">{username}</p>
+                <Link href={`/user/${userId}`} onClick={(e) => e.stopPropagation()} className="text-xs text-white/70 truncate hover:text-white/90 transition-colors">{username}</Link>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      {!mobileStatsOnly && (
       <div className="sm:hidden flex items-center justify-between gap-2 px-3 py-2.5 border-b border-gray-50">
         <p className="text-sm text-gray-800 truncate flex-1 font-medium">{photo.title}</p>
         <div className="flex items-center gap-2 shrink-0">
@@ -240,6 +270,7 @@ export function PhotoCard({ photo, trackViews = true }: PhotoCardProps) {
           )}
         </div>
       </div>
+      )}
     </article>
   );
 }

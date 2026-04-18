@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition, useRef } from "react";
 import { Download, Heart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { likePhoto } from "@/lib/actions/photo";
+import { likePhoto, unlikePhoto } from "@/lib/actions/photo";
 import { downloadImageAsJpeg } from "@/lib/download-image";
 import { toast } from "sonner";
 
@@ -31,21 +31,30 @@ export function PhotoActions({
 
   const handleLike = () => {
     if (liked) {
-      toast.info("你已经给这张照片点过赞了");
-      return;
+      setLikes((v) => Math.max(0, v - 1));
+      setLiked(false);
+      startTransition(async () => {
+        const result = await unlikePhoto(photoId);
+        if (result.error) {
+          setLikes((v) => v + 1);
+          setLiked(true);
+          toast.error(result.error);
+        }
+      });
+    } else {
+      setLikes((v) => v + 1);
+      setLiked(true);
+      setAnimating(true);
+      setTimeout(() => setAnimating(false), 500);
+      startTransition(async () => {
+        const result = await likePhoto(photoId);
+        if (result.error) {
+          setLikes((v) => Math.max(0, v - 1));
+          setLiked(false);
+          toast.error(result.error);
+        }
+      });
     }
-    setLikes((value) => value + 1);
-    setLiked(true);
-    setAnimating(true);
-    setTimeout(() => setAnimating(false), 500);
-    startTransition(async () => {
-      const result = await likePhoto(photoId);
-      if (result.error) {
-        setLikes((value) => Math.max(0, value - 1));
-        setLiked(false);
-        toast.error(result.error);
-      }
-    });
   };
 
   const handleDownload = async () => {

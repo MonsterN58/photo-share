@@ -93,19 +93,53 @@ if (-not (Test-Path ".env.local")) {
 }
 
 $envMap = Read-DotEnv ".env.local"
-$missingSupabase = @("NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY") |
-  Where-Object { -not (Test-EnvValue -EnvMap $envMap -Name $_) }
-$missingGithub = @("GITHUB_TOKEN", "GITHUB_REPO_OWNER", "GITHUB_REPO_NAME") |
-  Where-Object { -not (Test-EnvValue -EnvMap $envMap -Name $_) }
+$databaseMode = if ($envMap.ContainsKey("DATABASE_MODE")) { [string]$envMap["DATABASE_MODE"] } else { "local" }
+$storageMode = if ($envMap.ContainsKey("STORAGE_MODE")) { [string]$envMap["STORAGE_MODE"] } else { "gitee" }
 
-if ($missingSupabase.Count -gt 0) {
-  Write-Host "Warning: missing Supabase config: $($missingSupabase -join ', ')." -ForegroundColor Yellow
-  Write-Host "Auth, gallery data, upload database writes, comments, and /me need Supabase to work." -ForegroundColor Yellow
+switch ($databaseMode.ToLowerInvariant()) {
+  "remote" {
+    if ($storageMode.ToLowerInvariant() -ne "github") {
+      Write-Host "DATABASE_MODE=remote only takes effect with STORAGE_MODE=github. Current combination will fall back to local SQLite." -ForegroundColor Yellow
+    } else {
+      $missing = @("NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY") |
+        Where-Object { -not (Test-EnvValue -EnvMap $envMap -Name $_) }
+      if ($missing.Count -gt 0) {
+        Write-Host "Warning: missing remote database config: $($missing -join ', ')." -ForegroundColor Yellow
+        Write-Host "Remote database mode will not work until these are set." -ForegroundColor Yellow
+      }
+    }
+  }
+  "local" {
+    Write-Host "Database mode: local SQLite (separate file per storage mode)." -ForegroundColor DarkGray
+  }
+  default {
+    Write-Host "Warning: unsupported DATABASE_MODE '$databaseMode'. Supported values: local, remote." -ForegroundColor Yellow
+  }
 }
 
-if ($missingGithub.Count -gt 0) {
-  Write-Host "Warning: missing GitHub image storage config: $($missingGithub -join ', ')." -ForegroundColor Yellow
-  Write-Host "Image upload to GitHub will not work until these are set." -ForegroundColor Yellow
+switch ($storageMode.ToLowerInvariant()) {
+  "gitee" {
+    $missing = @("GITEE_TOKEN", "GITEE_REPO_OWNER", "GITEE_REPO_NAME") |
+      Where-Object { -not (Test-EnvValue -EnvMap $envMap -Name $_) }
+    if ($missing.Count -gt 0) {
+      Write-Host "Warning: missing Gitee image storage config: $($missing -join ', ')." -ForegroundColor Yellow
+      Write-Host "Image upload to Gitee will not work until these are set." -ForegroundColor Yellow
+    }
+  }
+  "github" {
+    $missing = @("GITHUB_TOKEN", "GITHUB_REPO_OWNER", "GITHUB_REPO_NAME") |
+      Where-Object { -not (Test-EnvValue -EnvMap $envMap -Name $_) }
+    if ($missing.Count -gt 0) {
+      Write-Host "Warning: missing GitHub image storage config: $($missing -join ', ')." -ForegroundColor Yellow
+      Write-Host "Image upload to GitHub will not work until these are set." -ForegroundColor Yellow
+    }
+  }
+  "local" {
+    Write-Host "Storage mode: local (files will be written under public/uploads by default)." -ForegroundColor DarkGray
+  }
+  default {
+    Write-Host "Warning: unsupported STORAGE_MODE '$storageMode'. Supported values: gitee, github, local." -ForegroundColor Yellow
+  }
 }
 
 if (-not $SkipInstall -and -not (Test-Path "node_modules")) {

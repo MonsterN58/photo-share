@@ -10,6 +10,814 @@
 Creating turbopack project { dir: 'D:\\AIcode项目\\盐选\\photo-share', testMode: true }
 
 ○ Compiling /login ...
- GET /login 200 in 4.8s (next.js: 4.1s, proxy.ts: 91ms, application-code: 612ms)
- GET / 200 in 18.9s (next.js: 1090ms, proxy.ts: 20ms, application-code: 17.8s)
+ GET /login 200 in 4.8s (ne GET / 200 in 899ms (next.js: 335ms, application-code: 564ms)
+ GET /api/me 200 in 423ms (next.js: 377ms, application-code: 45ms)
+ GET /api/me 200 in 430ms (next.js: 411ms, application-code: 19ms)
+ GET /login 200 in 250ms (next.js: 215ms, application-code: 35ms)
+ POST /login 200 in 38ms (next.js: 7ms, application-code: 31ms)
+  └─ ƒ login({}) in 2ms lib/actions/auth.ts
+ GET /login?tab=register 200 in 41ms (next.js: 11ms, application-code: 30ms)
+ GET /login?tab=register 200 in 51ms (next.js: 8ms, application-code: 44ms)
+ GET / 200 in 62ms (next.js: 6ms, application-code: 56ms)
+ POST /login?tab=register 303 in 133ms (next.js: 6ms, application-code: 127ms)
+  └─ ƒ register({}) in 41ms lib/actions/auth.ts
+ GET /login 200 in 34ms (next.js: 5ms, application-code: 29ms)
+ GET / 200 in 59ms (next.js: 8ms, application-code: 52ms)
+ POST /login 303 in 124ms (next.js: 7ms, application-code: 117ms)
+  └─ ƒ login({}) in 40ms lib/actions/auth.ts
+ GET / 200 in 68ms (next.js: 6ms, application-code: 62ms)
+ GET /api/me 200 in 24ms (next.js: 7ms, application-code: 17ms)
+ GET /api/me 200 in 18ms (next.js: 5ms, application-code: 14ms)
+ GET /upload 200 in 148ms (next.js: 107ms, application-code: 40ms)
+ POST /upload 200 in 9.1s (next.js: 6ms, application-code: 9.1s)
+  └─ ƒ uploadPhoto({}) in 9098ms lib/actions/photo.ts
+ POST /upload 200 in 759ms (next.js: 4ms, application-code: 755ms)
+  └─ ƒ uploadPhoto({}) in 718ms lib/actions/photo.ts
+ POST /upload 200 in 783ms (next.js: 4ms, application-code: 780ms)
+  └─ ƒ uploadPhoto({}) in 746ms lib/actions/photo.ts
+ POST /upload 200 in 928ms (next.js: 5ms, application-code: 923ms)
+  └─ ƒ uploadPhoto({}) in 892ms lib/actions/photo.ts
+ POST /upload 200 in 783ms (next.js: 4ms, application-code: 780ms)
+  └─ ƒ uploadPhoto({}) in 752ms lib/actions/photo.ts
+ POST /upload 200 in 785ms (next.js: 4ms, application-code: 781ms)
+  └─ ƒ uploadPhoto({}) in 750ms lib/actions/photo.ts
+ POST /upload 200 in 794ms (next.js: 6ms, application-code: 788ms)
+  └─ ƒ uploadPhoto({}) in 740ms lib/actions/photo.ts
+ POST /upload 200 in 925ms (next.js: 7ms, application-code: 918ms)
+  └─ ƒ uploadPhoto({}) in 878ms lib/actions/photo.ts
+ POST /upload 200 in 859ms (next.js: 5ms, application-code: 854ms)
+  └─ ƒ uploadPhoto({}) in 817ms lib/actions/photo.ts
+ POST /upload 200 in 1149ms (next.js: 8ms, application-code: 1141ms)
+  └─ ƒ uploadPhoto({}) in 1097ms lib/actions/photo.ts
+ POST /upload 200 in 980ms (next.js: 6ms, application-code: 974ms)
+  └─ ƒ uploadPhoto({}) in 940ms lib/actions/photo.ts
+ POST /upload 200 in 1273ms (next.js: 4ms, application-code: 1269ms)
+  └─ ƒ uploadPhoto({}) in 1218ms lib/actions/photo.ts
+ POST /upload 200 in 845ms (next.js: 6ms, application-code: 840ms)
+  └─ ƒ uploadPhoto({}) in 802ms lib/actions/photo.ts
+ POST /upload 200 in 814ms (next.js: 4ms, application-code: 810ms)
+  └─ ƒ uploadPhoto({}) in 774ms lib/actions/photo.ts
+ POST /upload 200 in 686ms (next.js: 5ms, application-code: 681ms)
+  └─ ƒ uploadPhoto({}) in 634ms lib/actions/photo.ts
+ POST /upload 200 in 654ms (next.js: 7ms, application-code: 647ms)
+  └─ ƒ uploadPhoto({}) in 607ms lib/actions/photo.ts
+ POST /upload 200 in 681ms (next.js: 6ms, application-code: 674ms)
+  └─ ƒ uploadPhoto({}) in 623ms lib/actions/photo.ts
+ POST /upload 200 in 871ms (next.js: 6ms, application-code: 865ms)
+  └─ ƒ uploadPhoto({}) in 808ms lib/actions/photo.ts
+ POST /upload 200 in 952ms (next.js: 7ms, application-code: 945ms)
+  └─ ƒ uploadPhoto({}) in 894ms lib/actions/photo.ts
+ POST /upload 200 in 729ms (next.js: 5ms, application-code: 724ms)
+  └─ ƒ uploadPhoto({}) in 678ms lib/actions/photo.ts
+ POST /upload 200 in 666ms (next.js: 9ms, application-code: 657ms)
+  └─ ƒ uploadPhoto({}) in 611ms lib/actions/photo.ts
+ POST /upload 200 in 693ms (next.js: 5ms, application-code: 688ms)
+  └─ ƒ uploadPhoto({}) in 645ms lib/actions/photo.ts
+ POST /upload 200 in 744ms (next.js: 5ms, application-code: 740ms)
+  └─ ƒ uploadPhoto({}) in 702ms lib/actions/photo.ts
+ POST /upload 200 in 685ms (next.js: 6ms, application-code: 679ms)
+  └─ ƒ uploadPhoto({}) in 641ms lib/actions/photo.ts
+ POST /upload 200 in 700ms (next.js: 4ms, application-code: 696ms)
+  └─ ƒ uploadPhoto({}) in 665ms lib/actions/photo.ts
+ POST /upload 200 in 762ms (next.js: 5ms, application-code: 757ms)
+  └─ ƒ uploadPhoto({}) in 723ms lib/actions/photo.ts
+ POST /upload 200 in 767ms (next.js: 4ms, application-code: 763ms)
+  └─ ƒ uploadPhoto({}) in 732ms lib/actions/photo.ts
+ POST /upload 200 in 741ms (next.js: 5ms, application-code: 736ms)
+  └─ ƒ uploadPhoto({}) in 702ms lib/actions/photo.ts
+ POST /upload 200 in 835ms (next.js: 4ms, application-code: 832ms)
+  └─ ƒ uploadPhoto({}) in 794ms lib/actions/photo.ts
+ POST /upload 200 in 744ms (next.js: 4ms, application-code: 740ms)
+  └─ ƒ uploadPhoto({}) in 709ms lib/actions/photo.ts
+ POST /upload 200 in 1378ms (next.js: 5ms, application-code: 1373ms)
+  └─ ƒ uploadPhoto({}) in 1327ms lib/actions/photo.ts
+ POST /upload 200 in 803ms (next.js: 4ms, application-code: 799ms)
+  └─ ƒ uploadPhoto({}) in 756ms lib/actions/photo.ts
+ POST /upload 200 in 690ms (next.js: 5ms, application-code: 685ms)
+  └─ ƒ uploadPhoto({}) in 653ms lib/actions/photo.ts
+ POST /upload 200 in 763ms (next.js: 4ms, application-code: 760ms)
+  └─ ƒ uploadPhoto({}) in 727ms lib/actions/photo.ts
+ POST /upload 200 in 684ms (next.js: 5ms, application-code: 679ms)
+  └─ ƒ uploadPhoto({}) in 643ms lib/actions/photo.ts
+ POST /upload 200 in 815ms (next.js: 5ms, application-code: 809ms)
+  └─ ƒ uploadPhoto({}) in 769ms lib/actions/photo.ts
+ POST /upload 200 in 798ms (next.js: 4ms, application-code: 794ms)
+  └─ ƒ uploadPhoto({}) in 761ms lib/actions/photo.ts
+ POST /upload 200 in 690ms (next.js: 4ms, application-code: 686ms)
+  └─ ƒ uploadPhoto({}) in 652ms lib/actions/photo.ts
+ POST /upload 200 in 803ms (next.js: 4ms, application-code: 799ms)
+  └─ ƒ uploadPhoto({}) in 764ms lib/actions/photo.ts
+ POST /upload 200 in 714ms (next.js: 5ms, application-code: 709ms)
+  └─ ƒ uploadPhoto({}) in 672ms lib/actions/photo.ts
+ POST /upload 200 in 836ms (next.js: 4ms, application-code: 832ms)
+  └─ ƒ uploadPhoto({}) in 799ms lib/actions/photo.ts
+ POST /upload 200 in 780ms (next.js: 6ms, application-code: 774ms)
+  └─ ƒ uploadPhoto({}) in 739ms lib/actions/photo.ts
+ POST /upload 200 in 762ms (next.js: 4ms, application-code: 758ms)
+  └─ ƒ uploadPhoto({}) in 722ms lib/actions/photo.ts
+ POST /upload 200 in 1042ms (next.js: 6ms, application-code: 1035ms)
+  └─ ƒ uploadPhoto({}) in 993ms lib/actions/photo.ts
+ POST /upload 200 in 662ms (next.js: 5ms, application-code: 657ms)
+  └─ ƒ uploadPhoto({}) in 617ms lib/actions/photo.ts
+ POST /upload 200 in 674ms (next.js: 4ms, application-code: 670ms)
+  └─ ƒ uploadPhoto({}) in 639ms lib/actions/photo.ts
+ POST /upload 200 in 722ms (next.js: 4ms, application-code: 718ms)
+  └─ ƒ uploadPhoto({}) in 681ms lib/actions/photo.ts
+ POST /upload 200 in 726ms (next.js: 4ms, application-code: 722ms)
+  └─ ƒ uploadPhoto({}) in 685ms lib/actions/photo.ts
+ POST /upload 200 in 906ms (next.js: 4ms, application-code: 902ms)
+  └─ ƒ uploadPhoto({}) in 868ms lib/actions/photo.ts
+ POST /upload 200 in 818ms (next.js: 8ms, application-code: 809ms)
+  └─ ƒ uploadPhoto({}) in 765ms lib/actions/photo.ts
+ POST /upload 200 in 821ms (next.js: 5ms, application-code: 816ms)
+  └─ ƒ uploadPhoto({}) in 780ms lib/actions/photo.ts
+ POST /upload 200 in 979ms (next.js: 8ms, application-code: 971ms)
+  └─ ƒ uploadPhoto({}) in 933ms lib/actions/photo.ts
+ POST /upload 200 in 797ms (next.js: 5ms, application-code: 792ms)
+  └─ ƒ uploadPhoto({}) in 733ms lib/actions/photo.ts
+ POST /upload 200 in 777ms (next.js: 6ms, application-code: 771ms)
+  └─ ƒ uploadPhoto({}) in 724ms lib/actions/photo.ts
+ POST /upload 200 in 807ms (next.js: 5ms, application-code: 802ms)
+  └─ ƒ uploadPhoto({}) in 746ms lib/actions/photo.ts
+ POST /upload 200 in 760ms (next.js: 8ms, application-code: 752ms)
+  └─ ƒ uploadPhoto({}) in 716ms lib/actions/photo.ts
+ POST /upload 200 in 895ms (next.js: 4ms, application-code: 891ms)
+  └─ ƒ uploadPhoto({}) in 857ms lib/actions/photo.ts
+ POST /upload 200 in 722ms (next.js: 6ms, application-code: 716ms)
+  └─ ƒ uploadPhoto({}) in 682ms lib/actions/photo.ts
+ POST /upload 200 in 732ms (next.js: 5ms, application-code: 727ms)
+  └─ ƒ uploadPhoto({}) in 688ms lib/actions/photo.ts
+ POST /upload 200 in 729ms (next.js: 6ms, application-code: 723ms)
+  └─ ƒ uploadPhoto({}) in 689ms lib/actions/photo.ts
+ POST /upload 200 in 704ms (next.js: 5ms, application-code: 699ms)
+  └─ ƒ uploadPhoto({}) in 662ms lib/actions/photo.ts
+ POST /upload 200 in 854ms (next.js: 5ms, application-code: 848ms)
+  └─ ƒ uploadPhoto({}) in 811ms lib/actions/photo.ts
+ GET /me 200 in 151ms (next.js: 118ms, application-code: 33ms)
+ GET /me 200 in 47ms (next.js: 4ms, application-code: 44ms)
+ GET / 200 in 88ms (next.js: 15ms, application-code: 74ms)
+ POST / 200 in 30ms (next.js: 6ms, application-code: 25ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 2ms lib/actions/photo.ts
+ POST / 200 in 70ms (next.js: 47ms, application-code: 23ms)
+  └─ ƒ incrementViews("4439726e-549e-4181-8d34-9213bdcf91e1") in 1ms lib/actions/photo.ts
+ GET /_next/image?url=https%3A%2F%2Fgitee.com%2Fmonstern%2Fpicture%2Fraw%2Fmaster%2Fuploads%2F2026%2F04%2F41547c62-feb8-4a13-a9e9-65e4b60c7ec6.jpg&w=640&q=75 500 in 5.6s (next.js: 5.5s, application-code: 57ms)
+ GET /_next/image?url=https%3A%2F%2Fgitee.com%2Fmonstern%2Fpicture%2Fraw%2Fmaster%2Fuploads%2F2026%2F04%2F41547c62-feb8-4a13-a9e9-65e4b60c7ec6.jpg&w=640&q=75 500 in 5.6s (next.js: 5.5s, application-code: 58ms)
+ POST / 200 in 21ms (next.js: 7ms, application-code: 15ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 8ms, application-code: 15ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 7ms, application-code: 15ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 11ms, application-code: 19ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 1ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 8ms, application-code: 17ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 6ms, application-code: 17ms)
+  └─ ƒ incrementViews("4fb4dc3b-ae16-41f4-9e67-ab420ad23a2f") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 8ms, application-code: 14ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 1ms lib/actions/photo.ts
+ POST / 200 in 73ms (next.js: 5ms, application-code: 68ms)
+  └─ ƒ likePhoto("e3701a7a-608c-43d9-a93f-30dc5688a021") in 5ms lib/actions/photo.ts
+ POST / 200 in 65ms (next.js: 10ms, application-code: 56ms)
+  └─ ƒ likePhoto("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 2ms lib/actions/photo.ts
+ POST / 200 in 67ms (next.js: 7ms, application-code: 60ms)
+  └─ ƒ likePhoto("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 4ms lib/actions/photo.ts
+ GET /photo/daf2e15b-c9a8-43de-845d-22a41db19ef8 200 in 1305ms (next.js: 1248ms, application-code: 57ms)
+ GET /api/me 200 in 32ms (next.js: 8ms, application-code: 24ms)
+ GET /api/me 200 in 50ms (next.js: 38ms, application-code: 12ms)
+ POST /photo/daf2e15b-c9a8-43de-845d-22a41db19ef8 200 in 154ms (next.js: 133ms, application-code: 20ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST /photo/daf2e15b-c9a8-43de-845d-22a41db19ef8 200 in 17ms (next.js: 5ms, application-code: 12ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST / 200 in 20ms (next.js: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("f33d5162-c96d-48fd-88b0-813cd5c7f2e6") in 0ms lib/actions/photo.ts
+ POST / 200 in 18ms (next.js: 4ms, application-code: 14ms)
+  └─ ƒ incrementViews("58b7b459-7e22-4325-9374-f8f28bf9d92f") in 0ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 8ms, application-code: 14ms)
+  └─ ƒ incrementViews("392f21e0-1e46-4a82-a63a-67787c58765e") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 8ms, application-code: 13ms)
+  └─ ƒ incrementViews("d413a8f4-9558-4644-bcc7-cbf256f5c762") in 0ms lib/actions/photo.ts
+ POST / 200 in 19ms (next.js: 7ms, application-code: 12ms)
+  └─ ƒ incrementViews("0bf22729-05a0-4af6-a648-e39a61129fae") in 1ms lib/actions/photo.ts
+ POST / 200 in 18ms (next.js: 4ms, application-code: 14ms)
+  └─ ƒ incrementViews("52430912-a647-448f-a5e0-b350267be7bc") in 1ms lib/actions/photo.ts
+ POST / 200 in 16ms (next.js: 4ms, application-code: 11ms)
+  └─ ƒ incrementViews("6cd3c09c-7cbf-4260-b93c-d336b259f317") in 1ms lib/actions/photo.ts
+ POST / 200 in 16ms (next.js: 4ms, application-code: 12ms)
+  └─ ƒ incrementViews("ff1152c8-e2ca-4265-b45e-b5a16cfa4bb5") in 1ms lib/actions/photo.ts
+ POST / 200 in 17ms (next.js: 6ms, application-code: 11ms)
+  └─ ƒ incrementViews("1e1eba18-755d-473f-bc43-151bc45a43d5") in 0ms lib/actions/photo.ts
+ POST / 200 in 15ms (next.js: 4ms, application-code: 11ms)
+  └─ ƒ incrementViews("18a37130-d348-44e7-8869-5808461dc115") in 0ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 9ms, application-code: 13ms)
+  └─ ƒ incrementViews("0d1c79f4-75ff-4917-9a6f-4bb31fb147a7") in 1ms lib/actions/photo.ts
+ POST / 200 in 20ms (next.js: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("bd6973e5-edc6-4703-8bd1-3cbff98b4575") in 1ms lib/actions/photo.ts
+ POST / 200 in 17ms (next.js: 5ms, application-code: 12ms)
+  └─ ƒ incrementViews("6a11cf49-4af8-4dcd-831d-2219f1d6f323") in 0ms lib/actions/photo.ts
+ POST / 200 in 19ms (next.js: 5ms, application-code: 14ms)
+  └─ ƒ incrementViews("ddb773f0-b39c-471e-813c-038e8058473a") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 7ms, application-code: 14ms)
+  └─ ƒ incrementViews("15341bf3-1ba0-4177-815d-d1ef098223c8") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 6ms, application-code: 16ms)
+  └─ ƒ incrementViews("9d4fc013-6511-47af-ad87-2c9d5b4a3ad8") in 1ms lib/actions/photo.ts
+ POST / 200 in 16ms (next.js: 5ms, application-code: 11ms)
+  └─ ƒ incrementViews("6f889e75-9266-4259-94b6-a9af4508b22c") in 1ms lib/actions/photo.ts
+ POST / 200 in 18ms (next.js: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("31f8dd91-c2d0-42fe-8605-ee2c3082593d") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 5ms, application-code: 16ms)
+  └─ ƒ incrementViews("8114f56f-c10c-4597-b7dd-b0331fb6f159") in 1ms lib/actions/photo.ts
+ POST / 200 in 41ms (next.js: 7ms, application-code: 35ms)
+  └─ ƒ incrementViews("a5aa006e-4e04-4b6c-89d3-4d5bb02120b3") in 1ms lib/actions/photo.ts
+ POST / 200 in 20ms (next.js: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("cebafcf7-2288-479b-9ada-63714d1e541a") in 1ms lib/actions/photo.ts
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://169.254.215.53:3000
+- Environments: .env.local
+✓ Ready in 1095ms
+Creating turbopack project { dir: 'D:\\AIcode项目\\盐选\\photo-share', testMode: true }
+- Experiments (use with caution):
+  · serverActions
+
+ GET / 200 in 2.6s (next.js: 1447ms, application-code: 1183ms)
+ GET /api/me 200 in 206ms (next.js: 152ms, application-code: 54ms)
+ GET /api/me 200 in 42ms (next.js: 25ms, application-code: 17ms)
+ GET / 200 in 274ms (next.js: 94ms, application-code: 180ms)
+ GET / 200 in 114ms (next.js: 8ms, application-code: 106ms)
+ GET / 200 in 54ms (next.js: 8ms, application-code: 46ms)
+ POST / 200 in 55ms (next.js: 9ms, application-code: 46ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 3ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 8ms, application-code: 17ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 10ms, application-code: 14ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 8ms, application-code: 15ms)
+  └─ ƒ incrementViews("4fb4dc3b-ae16-41f4-9e67-ab420ad23a2f") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 7ms, application-code: 14ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 7ms, application-code: 16ms)
+  └─ ƒ incrementViews("4439726e-549e-4181-8d34-9213bdcf91e1") in 1ms lib/actions/photo.ts
+ POST / 200 in 17ms (next.js: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 1ms lib/actions/photo.ts
+ POST / 200 in 16ms (next.js: 5ms, application-code: 10ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 0ms lib/actions/photo.ts
+ POST / 200 in 14ms (next.js: 5ms, application-code: 9ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 0ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 8ms, application-code: 17ms)
+  └─ ƒ incrementViews("f33d5162-c96d-48fd-88b0-813cd5c7f2e6") in 1ms lib/actions/photo.ts
+ POST / 200 in 19ms (next.js: 6ms, application-code: 13ms)
+  └─ ƒ incrementViews("392f21e0-1e46-4a82-a63a-67787c58765e") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 8ms, application-code: 15ms)
+  └─ ƒ incrementViews("58b7b459-7e22-4325-9374-f8f28bf9d92f") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 6ms, application-code: 16ms)
+  └─ ƒ incrementViews("d413a8f4-9558-4644-bcc7-cbf256f5c762") in 1ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 9ms, application-code: 19ms)
+  └─ ƒ incrementViews("0bf22729-05a0-4af6-a648-e39a61129fae") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 7ms, application-code: 15ms)
+  └─ ƒ incrementViews("52430912-a647-448f-a5e0-b350267be7bc") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("1e1eba18-755d-473f-bc43-151bc45a43d5") in 1ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 7ms, application-code: 24ms)
+  └─ ƒ incrementViews("6cd3c09c-7cbf-4260-b93c-d336b259f317") in 1ms lib/actions/photo.ts
+ POST / 200 in 42ms (next.js: 8ms, application-code: 34ms)
+  └─ ƒ incrementViews("ff1152c8-e2ca-4265-b45e-b5a16cfa4bb5") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 6ms, application-code: 15ms)
+  └─ ƒ incrementViews("18a37130-d348-44e7-8869-5808461dc115") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 6ms, application-code: 15ms)
+  └─ ƒ incrementViews("0d1c79f4-75ff-4917-9a6f-4bb31fb147a7") in 1ms lib/actions/photo.ts
+ POST / 200 in 19ms (next.js: 5ms, application-code: 14ms)
+  └─ ƒ incrementViews("bd6973e5-edc6-4703-8bd1-3cbff98b4575") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 7ms, application-code: 14ms)
+  └─ ƒ incrementViews("6a11cf49-4af8-4dcd-831d-2219f1d6f323") in 1ms lib/actions/photo.ts
+ POST / 200 in 18ms (next.js: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("6f889e75-9266-4259-94b6-a9af4508b22c") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 6ms, application-code: 16ms)
+  └─ ƒ incrementViews("ddb773f0-b39c-471e-813c-038e8058473a") in 1ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 8ms, application-code: 16ms)
+  └─ ƒ incrementViews("9d4fc013-6511-47af-ad87-2c9d5b4a3ad8") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 8ms, application-code: 15ms)
+  └─ ƒ incrementViews("15341bf3-1ba0-4177-815d-d1ef098223c8") in 1ms lib/actions/photo.ts
+ POST / 200 in 20ms (next.js: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("31f8dd91-c2d0-42fe-8605-ee2c3082593d") in 1ms lib/actions/photo.ts
+ POST / 200 in 19ms (next.js: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("8114f56f-c10c-4597-b7dd-b0331fb6f159") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 7ms, application-code: 14ms)
+  └─ ƒ incrementViews("a5aa006e-4e04-4b6c-89d3-4d5bb02120b3") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 5ms, application-code: 17ms)
+  └─ ƒ incrementViews("cebafcf7-2288-479b-9ada-63714d1e541a") in 1ms lib/actions/photo.ts
+✓ Compiled in 94ms
+ GET / 200 in 466ms (next.js: 152ms, application-code: 314ms)
+ GET / 200 in 253ms (next.js: 6ms, application-code: 247ms)
+ GET / 200 in 236ms (next.js: 83ms, application-code: 153ms)
+ GET / 200 in 241ms (next.js: 8ms, application-code: 234ms)
+ GET / 200 in 292ms (next.js: 46ms, application-code: 246ms)
+ GET / 200 in 293ms (next.js: 115ms, application-code: 178ms)
+ GET / 200 in 316ms (next.js: 8ms, application-code: 308ms)
+ GET / 200 in 265ms (next.js: 14ms, application-code: 251ms)
+ GET / 200 in 200ms (next.js: 7ms, application-code: 194ms)
+ GET / 200 in 202ms (next.js: 94ms, application-code: 108ms)
+ GET /upload 200 in 177ms (next.js: 101ms, application-code: 76ms)
+ POST /upload 200 in 17.8s (next.js: 10ms, application-code: 17.8s)
+  └─ ƒ uploadPhoto({}) in 17683ms lib/actions/photo.ts
+ GET /me 200 in 411ms (next.js: 215ms, application-code: 195ms)
+ GET /upload 200 in 426ms (next.js: 89ms, application-code: 337ms)
+ GET /upload 200 in 161ms (next.js: 7ms, application-code: 154ms)
+ GET /me 200 in 84ms (next.js: 7ms, application-code: 77ms)
+ GET / 200 in 263ms (next.js: 104ms, application-code: 159ms)
+ POST / 200 in 159ms (next.js: 23ms, application-code: 137ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 2ms lib/actions/photo.ts
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 4.2s (next.js: 3.2s, application-code: 1013ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 950ms (next.js: 769ms, application-code: 181ms)
+ GET /api/me 200 in 133ms (next.js: 77ms, application-code: 56ms)
+ GET /api/me 200 in 141ms (next.js: 109ms, application-code: 32ms)
+ POST /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 37ms (next.js: 9ms, application-code: 28ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ POST /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 29ms (next.js: 9ms, application-code: 20ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ GET /_next/image?url=https%3A%2F%2Fgitee.com%2Fmonstern%2Fpicture%2Fraw%2Fmaster%2Fuploads%2F2026%2F04%2Fdbe443ae-af92-4d5e-be6b-ef45b9c4ebcc.webp&w=1200&q=75 500 in 5.4s (next.js: 5.3s, application-code: 52ms)
+ GET /_next/image?url=https%3A%2F%2Fgitee.com%2Fmonstern%2Fpicture%2Fraw%2Fmaster%2Fuploads%2F2026%2F04%2Fdbe443ae-af92-4d5e-be6b-ef45b9c4ebcc.webp&w=1200&q=75 500 in 5.4s (next.js: 5.3s, application-code: 53ms)
+ GET /_next/image?url=https%3A%2F%2Fgitee.com%2Fmonstern%2Fpicture%2Fraw%2Fmaster%2Fuploads%2F2026%2F04%2Fdbe443ae-af92-4d5e-be6b-ef45b9c4ebcc.webp&w=1920&q=75 500 in 5.1s (next.js: 5.0s, application-code: 22ms)
+ GET /_next/image?url=https%3A%2F%2Fgitee.com%2Fmonstern%2Fpicture%2Fraw%2Fmaster%2Fuploads%2F2026%2F04%2Fdbe443ae-af92-4d5e-be6b-ef45b9c4ebcc.webp&w=1920&q=75 500 in 5.1s (next.js: 5.0s, application-code: 22ms)
+ POST /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 168ms (next.js: 97ms, application-code: 71ms)
+  └─ ƒ likePhoto("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 4ms lib/actions/photo.ts
+ GET /api/download/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 502 in 6.1s (next.js: 1014ms, application-code: 5.1s)
+✓ Compiled in 80ms
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 931ms (next.js: 372ms, application-code: 559ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 424ms (next.js: 12ms, application-code: 412ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 413ms (next.js: 16ms, application-code: 398ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 480ms (next.js: 70ms, application-code: 410ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 479ms (next.js: 210ms, application-code: 269ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 483ms (next.js: 136ms, application-code: 348ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 423ms (next.js: 8ms, application-code: 415ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 341ms (next.js: 17ms, application-code: 324ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 242ms (next.js: 8ms, application-code: 235ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 242ms (next.js: 101ms, application-code: 141ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 245ms (next.js: 53ms, application-code: 192ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 200ms (next.js: 107ms, application-code: 93ms)
+  Reload env: .env.local
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 896ms (next.js: 295ms, application-code: 601ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 483ms (next.js: 68ms, application-code: 414ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 551ms (next.js: 8ms, application-code: 544ms)
+ GET /api/me 200 in 102ms (next.js: 72ms, application-code: 30ms)
+ GET /api/me 200 in 21ms (next.js: 5ms, application-code: 16ms)
+ GET /api/me 200 in 28ms (next.js: 5ms, application-code: 22ms)
+ POST /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 33ms (next.js: 8ms, application-code: 25ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+✓ Compiled in 98ms
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 1449ms (next.js: 799ms, application-code: 651ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 483ms (next.js: 14ms, application-code: 469ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 437ms (next.js: 16ms, application-code: 421ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 436ms (next.js: 140ms, application-code: 296ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 437ms (next.js: 198ms, application-code: 239ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 443ms (next.js: 91ms, application-code: 351ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 442ms (next.js: 13ms, application-code: 429ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 348ms (next.js: 16ms, application-code: 331ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 255ms (next.js: 6ms, application-code: 248ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 207ms (next.js: 57ms, application-code: 151ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 259ms (next.js: 59ms, application-code: 199ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 210ms (next.js: 108ms, application-code: 103ms)
+ GET / 200 in 199ms (next.js: 137ms, application-code: 62ms)
+ POST / 200 in 60ms (next.js: 8ms, application-code: 52ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 1ms lib/actions/photo.ts
+ POST / 200 in 64ms (next.js: 9ms, application-code: 55ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST / 200 in 33ms (next.js: 9ms, application-code: 24ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 6ms, application-code: 23ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 7ms, application-code: 16ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 8ms, application-code: 15ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ POST / 200 in 20ms (next.js: 7ms, application-code: 13ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 0ms lib/actions/photo.ts
+ POST / 200 in 15ms (next.js: 5ms, application-code: 10ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 0ms lib/actions/photo.ts
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 666ms (next.js: 623ms, application-code: 43ms)
+ GET /api/me 200 in 99ms (next.js: 64ms, application-code: 35ms)
+ GET /api/me 200 in 40ms (next.js: 24ms, application-code: 16ms)
+ POST /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 39ms (next.js: 9ms, application-code: 31ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ POST /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 22ms (next.js: 7ms, application-code: 15ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 495ms (next.js: 171ms, proxy.ts: 108ms, application-code: 216ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 449ms (next.js: 21ms, proxy.ts: 15ms, application-code: 413ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 353ms (next.js: 80ms, proxy.ts: 19ms, application-code: 255ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 357ms (next.js: 34ms, proxy.ts: 19ms, application-code: 305ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 357ms (next.js: 129ms, proxy.ts: 19ms, application-code: 210ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 369ms (next.js: 170ms, proxy.ts: 19ms, application-code: 180ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 281ms (next.js: 17ms, proxy.ts: 72ms, application-code: 192ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 542ms (next.js: 36ms, proxy.ts: 11ms, application-code: 495ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 527ms (next.js: 42ms, proxy.ts: 71ms, application-code: 415ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 524ms (next.js: 77ms, proxy.ts: 71ms, application-code: 377ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 524ms (next.js: 120ms, proxy.ts: 70ms, application-code: 333ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 490ms (next.js: 181ms, proxy.ts: 25ms, application-code: 284ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 472ms (next.js: 159ms, proxy.ts: 116ms, application-code: 197ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 380ms (next.js: 45ms, proxy.ts: 9ms, application-code: 326ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 372ms (next.js: 70ms, proxy.ts: 23ms, application-code: 279ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 378ms (next.js: 111ms, proxy.ts: 23ms, application-code: 244ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 374ms (next.js: 128ms, proxy.ts: 55ms, application-code: 191ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 333ms (next.js: 160ms, proxy.ts: 21ms, application-code: 152ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 301ms (next.js: 23ms, proxy.ts: 97ms, application-code: 181ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 329ms (next.js: 39ms, proxy.ts: 13ms, application-code: 277ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 315ms (next.js: 101ms, proxy.ts: 18ms, application-code: 196ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 309ms (next.js: 138ms, proxy.ts: 18ms, application-code: 153ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 301ms (next.js: 133ms, proxy.ts: 60ms, application-code: 107ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 295ms (next.js: 157ms, proxy.ts: 76ms, application-code: 61ms)
+✓ Compiled in 879ms
+  Reload env: .env.local
+✓ Compiled in 124ms
+  Reload env: .env.local
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 12.3s (next.js: 3.6s, proxy.ts: 7.2s, application-code: 1471ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 1287ms (next.js: 488ms, proxy.ts: 577ms, application-code: 222ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 1374ms (next.js: 128ms, proxy.ts: 580ms, application-code: 666ms)
+ GET /api/me 200 in 184ms (next.js: 125ms, proxy.ts: 14ms, application-code: 46ms)
+ GET /api/me 200 in 185ms (next.js: 150ms, proxy.ts: 13ms, application-code: 22ms)
+  Reload env: .env.local
+✓ Compiled in 6ms
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 1038ms (next.js: 264ms, proxy.ts: 419ms, application-code: 355ms)
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 663ms (next.js: 328ms, proxy.ts: 13ms, application-code: 323ms)
+ GET /api/me 200 in 95ms (next.js: 53ms, proxy.ts: 16ms, application-code: 26ms)
+ GET /api/me 200 in 96ms (next.js: 62ms, proxy.ts: 16ms, application-code: 18ms)
+ GET /api/me 200 in 42ms (next.js: 11ms, proxy.ts: 22ms, application-code: 10ms)
+ POST /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 193ms (next.js: 105ms, proxy.ts: 23ms, application-code: 65ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ GET /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 235ms (next.js: 94ms, proxy.ts: 8ms, application-code: 133ms)
+ GET /api/me 200 in 74ms (next.js: 25ms, proxy.ts: 31ms, application-code: 17ms)
+ GET /api/me 200 in 96ms (next.js: 40ms, proxy.ts: 31ms, application-code: 24ms)
+ GET /api/me 200 in 96ms (next.js: 48ms, proxy.ts: 31ms, application-code: 17ms)
+ POST /photo/8e27c5e4-6f8a-45ba-aacb-e9bdc7266550 200 in 119ms (next.js: 72ms, proxy.ts: 28ms, application-code: 19ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ GET / 200 in 287ms (next.js: 214ms, proxy.ts: 6ms, application-code: 67ms)
+ POST / 200 in 72ms (next.js: 15ms, proxy.ts: 16ms, application-code: 42ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 1ms lib/actions/photo.ts
+ POST / 200 in 45ms (next.js: 11ms, proxy.ts: 15ms, application-code: 19ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 5ms, proxy.ts: 9ms, application-code: 14ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 6ms, proxy.ts: 8ms, application-code: 12ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 7ms, proxy.ts: 9ms, application-code: 12ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 6ms, proxy.ts: 10ms, application-code: 12ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 7ms, proxy.ts: 9ms, application-code: 12ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 7ms, proxy.ts: 11ms, application-code: 12ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 7ms, proxy.ts: 7ms, application-code: 16ms)
+  └─ ƒ incrementViews("f33d5162-c96d-48fd-88b0-813cd5c7f2e6") in 1ms lib/actions/photo.ts
+ POST / 200 in 49ms (next.js: 10ms, proxy.ts: 12ms, application-code: 27ms)
+  └─ ƒ incrementViews("4fb4dc3b-ae16-41f4-9e67-ab420ad23a2f") in 1ms lib/actions/photo.ts
+ POST / 200 in 47ms (next.js: 10ms, proxy.ts: 12ms, application-code: 25ms)
+  └─ ƒ incrementViews("4439726e-549e-4181-8d34-9213bdcf91e1") in 1ms lib/actions/photo.ts
+ POST / 200 in 33ms (next.js: 9ms, proxy.ts: 10ms, application-code: 14ms)
+  └─ ƒ incrementViews("392f21e0-1e46-4a82-a63a-67787c58765e") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 7ms, proxy.ts: 9ms, application-code: 13ms)
+  └─ ƒ incrementViews("d413a8f4-9558-4644-bcc7-cbf256f5c762") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 6ms, proxy.ts: 7ms, application-code: 10ms)
+  └─ ƒ incrementViews("58b7b459-7e22-4325-9374-f8f28bf9d92f") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 9ms, proxy.ts: 8ms, application-code: 13ms)
+  └─ ƒ incrementViews("6cd3c09c-7cbf-4260-b93c-d336b259f317") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 7ms, proxy.ts: 9ms, application-code: 10ms)
+  └─ ƒ incrementViews("52430912-a647-448f-a5e0-b350267be7bc") in 0ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 6ms, proxy.ts: 9ms, application-code: 9ms)
+  └─ ƒ incrementViews("0bf22729-05a0-4af6-a648-e39a61129fae") in 0ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 6ms, proxy.ts: 7ms, application-code: 9ms)
+  └─ ƒ incrementViews("1e1eba18-755d-473f-bc43-151bc45a43d5") in 0ms lib/actions/photo.ts
+ POST / 200 in 88ms (next.js: 6ms, proxy.ts: 10ms, application-code: 72ms)
+  └─ ƒ likePhoto("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 8ms lib/actions/photo.ts
+ POST / 200 in 77ms (next.js: 7ms, proxy.ts: 11ms, application-code: 59ms)
+  └─ ƒ likePhoto("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 5ms lib/actions/photo.ts
+ GET /photo/3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f 200 in 736ms (next.js: 638ms, proxy.ts: 7ms, application-code: 91ms)
+ GET /api/me 200 in 86ms (next.js: 18ms, proxy.ts: 31ms, application-code: 37ms)
+ GET /api/me 200 in 84ms (next.js: 25ms, proxy.ts: 32ms, application-code: 28ms)
+ POST /photo/3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f 200 in 117ms (next.js: 69ms, proxy.ts: 32ms, application-code: 16ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+ POST /photo/3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f 200 in 42ms (next.js: 14ms, proxy.ts: 9ms, application-code: 19ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+✓ Compiled in 417ms
+ GET / 200 in 801ms (next.js: 181ms, proxy.ts: 77ms, application-code: 543ms)
+ GET / 200 in 479ms (next.js: 278ms, proxy.ts: 24ms, application-code: 177ms)
+ GET / 200 in 732ms (next.js: 22ms, proxy.ts: 217ms, application-code: 493ms)
+ GET /api/me 200 in 117ms (next.js: 75ms, proxy.ts: 21ms, application-code: 21ms)
+ GET /api/me 200 in 116ms (next.js: 21ms, proxy.ts: 85ms, application-code: 10ms)
+ POST / 200 in 52ms (next.js: 9ms, proxy.ts: 12ms, application-code: 31ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 7ms, proxy.ts: 10ms, application-code: 10ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 7ms, proxy.ts: 10ms, application-code: 14ms)
+  └─ ƒ incrementViews("f33d5162-c96d-48fd-88b0-813cd5c7f2e6") in 1ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 7ms, proxy.ts: 8ms, application-code: 13ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 1ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 7ms, proxy.ts: 8ms, application-code: 12ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 0ms lib/actions/photo.ts
+ POST / 200 in 34ms (next.js: 6ms, proxy.ts: 9ms, application-code: 20ms)
+  └─ ƒ incrementViews("4fb4dc3b-ae16-41f4-9e67-ab420ad23a2f") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 8ms, proxy.ts: 9ms, application-code: 12ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 7ms, proxy.ts: 9ms, application-code: 13ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 6ms, proxy.ts: 7ms, application-code: 16ms)
+  └─ ƒ incrementViews("392f21e0-1e46-4a82-a63a-67787c58765e") in 1ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 6ms, proxy.ts: 9ms, application-code: 17ms)
+  └─ ƒ incrementViews("4439726e-549e-4181-8d34-9213bdcf91e1") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 9ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+ POST / 200 in 37ms (next.js: 8ms, proxy.ts: 12ms, application-code: 17ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 1ms lib/actions/photo.ts
+ GET / 200 in 271ms (next.js: 105ms, proxy.ts: 62ms, application-code: 104ms)
+ GET /me 200 in 244ms (next.js: 169ms, proxy.ts: 8ms, application-code: 67ms)
+ POST /me 200 in 1084ms (next.js: 10ms, proxy.ts: 16ms, application-code: 1058ms)
+  └─ ƒ uploadAvatar({}) in 987ms lib/actions/profile.ts
+ GET /api/me 200 in 92ms (next.js: 52ms, proxy.ts: 19ms, application-code: 22ms)
+ GET /api/me 200 in 159ms (next.js: 60ms, proxy.ts: 20ms, application-code: 79ms)
+ GET /me 200 in 175ms (next.js: 75ms, proxy.ts: 20ms, application-code: 80ms)
+ GET / 200 in 53ms (next.js: 6ms, proxy.ts: 8ms, application-code: 40ms)
+ GET / 200 in 373ms (next.js: 9ms, proxy.ts: 5ms, application-code: 359ms)
+ GET /api/me 200 in 63ms (next.js: 17ms, proxy.ts: 24ms, application-code: 23ms)
+ GET /api/me 200 in 57ms (next.js: 26ms, proxy.ts: 16ms, application-code: 15ms)
+ POST / 200 in 44ms (next.js: 10ms, proxy.ts: 11ms, application-code: 23ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 8ms, proxy.ts: 10ms, application-code: 11ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 1ms lib/actions/photo.ts
+ POST / 200 in 33ms (next.js: 8ms, proxy.ts: 8ms, application-code: 17ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 6ms, proxy.ts: 8ms, application-code: 12ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 7ms, proxy.ts: 8ms, application-code: 13ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 6ms, proxy.ts: 9ms, application-code: 13ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+ POST / 200 in 33ms (next.js: 9ms, proxy.ts: 10ms, application-code: 14ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 32ms (next.js: 6ms, proxy.ts: 10ms, application-code: 16ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 1ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 5ms, proxy.ts: 10ms, application-code: 12ms)
+  └─ ƒ incrementViews("4fb4dc3b-ae16-41f4-9e67-ab420ad23a2f") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 8ms, proxy.ts: 9ms, application-code: 9ms)
+  └─ ƒ incrementViews("4439726e-549e-4181-8d34-9213bdcf91e1") in 0ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 7ms, proxy.ts: 7ms, application-code: 10ms)
+  └─ ƒ incrementViews("f33d5162-c96d-48fd-88b0-813cd5c7f2e6") in 0ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 7ms, proxy.ts: 8ms, application-code: 11ms)
+  └─ ƒ incrementViews("392f21e0-1e46-4a82-a63a-67787c58765e") in 1ms lib/actions/photo.ts
+ GET /me 200 in 62ms (next.js: 8ms, proxy.ts: 7ms, application-code: 47ms)
+ GET / 200 in 54ms (next.js: 6ms, proxy.ts: 11ms, application-code: 37ms)
+ POST / 200 in 27ms (next.js: 7ms, proxy.ts: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("d413a8f4-9558-4644-bcc7-cbf256f5c762") in 1ms lib/actions/photo.ts
+ POST / 200 in 49ms (next.js: 23ms, proxy.ts: 11ms, application-code: 15ms)
+  └─ ƒ incrementViews("58b7b459-7e22-4325-9374-f8f28bf9d92f") in 1ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 6ms, proxy.ts: 5ms, application-code: 12ms)
+  └─ ƒ incrementViews("6cd3c09c-7cbf-4260-b93c-d336b259f317") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 5ms, proxy.ts: 5ms, application-code: 11ms)
+  └─ ƒ incrementViews("0bf22729-05a0-4af6-a648-e39a61129fae") in 0ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 7ms, proxy.ts: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("1e1eba18-755d-473f-bc43-151bc45a43d5") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 10ms, proxy.ts: 9ms, application-code: 9ms)
+  └─ ƒ incrementViews("52430912-a647-448f-a5e0-b350267be7bc") in 0ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 7ms, proxy.ts: 6ms, application-code: 11ms)
+  └─ ƒ incrementViews("0d1c79f4-75ff-4917-9a6f-4bb31fb147a7") in 1ms lib/actions/photo.ts
+ POST / 200 in 20ms (next.js: 4ms, proxy.ts: 6ms, application-code: 10ms)
+  └─ ƒ incrementViews("18a37130-d348-44e7-8869-5808461dc115") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 6ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("ff1152c8-e2ca-4265-b45e-b5a16cfa4bb5") in 1ms lib/actions/photo.ts
+ POST / 200 in 18ms (next.js: 5ms, proxy.ts: 6ms, application-code: 7ms)
+  └─ ƒ incrementViews("bd6973e5-edc6-4703-8bd1-3cbff98b4575") in 0ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 6ms, proxy.ts: 7ms, application-code: 12ms)
+  └─ ƒ incrementViews("ddb773f0-b39c-471e-813c-038e8058473a") in 1ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 6ms, proxy.ts: 8ms, application-code: 13ms)
+  └─ ƒ incrementViews("6f889e75-9266-4259-94b6-a9af4508b22c") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 6ms, proxy.ts: 10ms, application-code: 14ms)
+  └─ ƒ incrementViews("6a11cf49-4af8-4dcd-831d-2219f1d6f323") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 9ms, proxy.ts: 8ms, application-code: 13ms)
+  └─ ƒ incrementViews("9d4fc013-6511-47af-ad87-2c9d5b4a3ad8") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 9ms, proxy.ts: 7ms, application-code: 14ms)
+  └─ ƒ incrementViews("15341bf3-1ba0-4177-815d-d1ef098223c8") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 8ms, proxy.ts: 7ms, application-code: 15ms)
+  └─ ƒ incrementViews("31f8dd91-c2d0-42fe-8605-ee2c3082593d") in 1ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 9ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("8114f56f-c10c-4597-b7dd-b0331fb6f159") in 1ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 6ms, proxy.ts: 5ms, application-code: 13ms)
+  └─ ƒ incrementViews("a5aa006e-4e04-4b6c-89d3-4d5bb02120b3") in 1ms lib/actions/photo.ts
+  Reload env: .env.local
+✓ Compiled in 180ms
+○ Compiling proxy ...
+ GET / 200 in 895ms (next.js: 215ms, proxy.ts: 121ms, application-code: 559ms)
+ GET / 200 in 496ms (next.js: 239ms, proxy.ts: 11ms, application-code: 245ms)
+ GET / 200 in 835ms (next.js: 10ms, proxy.ts: 284ms, application-code: 541ms)
+ GET /api/me 200 in 146ms (next.js: 99ms, proxy.ts: 9ms, application-code: 38ms)
+ GET /api/me 200 in 165ms (next.js: 13ms, proxy.ts: 136ms, application-code: 16ms)
+ POST / 200 in 48ms (next.js: 9ms, proxy.ts: 13ms, application-code: 26ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 5ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 8ms, proxy.ts: 7ms, application-code: 13ms)
+  └─ ƒ incrementViews("4439726e-549e-4181-8d34-9213bdcf91e1") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 8ms, proxy.ts: 6ms, application-code: 13ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 6ms, proxy.ts: 7ms, application-code: 11ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 4ms, proxy.ts: 7ms, application-code: 11ms)
+  └─ ƒ incrementViews("f33d5162-c96d-48fd-88b0-813cd5c7f2e6") in 0ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 6ms, proxy.ts: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 6ms, proxy.ts: 7ms, application-code: 15ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 6ms, proxy.ts: 8ms, application-code: 11ms)
+  └─ ƒ incrementViews("4fb4dc3b-ae16-41f4-9e67-ab420ad23a2f") in 1ms lib/actions/photo.ts
+ POST / 200 in 37ms (next.js: 6ms, proxy.ts: 6ms, application-code: 26ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 6ms, proxy.ts: 8ms, application-code: 15ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 1ms lib/actions/photo.ts
+ POST / 200 in 142ms (next.js: 32ms, proxy.ts: 66ms, application-code: 44ms)
+  └─ ƒ incrementViews("392f21e0-1e46-4a82-a63a-67787c58765e") in 1ms lib/actions/photo.ts
+ POST / 200 in 298ms (next.js: 37ms, proxy.ts: 27ms, application-code: 235ms)
+  └─ ƒ incrementViews("58b7b459-7e22-4325-9374-f8f28bf9d92f") in 7ms lib/actions/photo.ts
+ POST / 200 in 61ms (next.js: 23ms, proxy.ts: 17ms, application-code: 22ms)
+  └─ ƒ incrementViews("d413a8f4-9558-4644-bcc7-cbf256f5c762") in 1ms lib/actions/photo.ts
+ POST / 200 in 38ms (next.js: 11ms, proxy.ts: 10ms, application-code: 17ms)
+  └─ ƒ incrementViews("0bf22729-05a0-4af6-a648-e39a61129fae") in 1ms lib/actions/photo.ts
+ POST / 200 in 36ms (next.js: 9ms, proxy.ts: 10ms, application-code: 17ms)
+  └─ ƒ incrementViews("52430912-a647-448f-a5e0-b350267be7bc") in 1ms lib/actions/photo.ts
+ POST / 200 in 36ms (next.js: 7ms, proxy.ts: 12ms, application-code: 17ms)
+  └─ ƒ incrementViews("6cd3c09c-7cbf-4260-b93c-d336b259f317") in 1ms lib/actions/photo.ts
+ POST / 200 in 35ms (next.js: 9ms, proxy.ts: 10ms, application-code: 16ms)
+  └─ ƒ incrementViews("ff1152c8-e2ca-4265-b45e-b5a16cfa4bb5") in 1ms lib/actions/photo.ts
+ POST / 200 in 42ms (next.js: 10ms, proxy.ts: 13ms, application-code: 18ms)
+  └─ ƒ incrementViews("18a37130-d348-44e7-8869-5808461dc115") in 1ms lib/actions/photo.ts
+ POST / 200 in 32ms (next.js: 7ms, proxy.ts: 10ms, application-code: 14ms)
+  └─ ƒ incrementViews("0d1c79f4-75ff-4917-9a6f-4bb31fb147a7") in 1ms lib/actions/photo.ts
+ POST / 200 in 37ms (next.js: 8ms, proxy.ts: 10ms, application-code: 19ms)
+  └─ ƒ incrementViews("1e1eba18-755d-473f-bc43-151bc45a43d5") in 1ms lib/actions/photo.ts
+ POST / 200 in 35ms (next.js: 10ms, proxy.ts: 10ms, application-code: 15ms)
+  └─ ƒ incrementViews("6a11cf49-4af8-4dcd-831d-2219f1d6f323") in 1ms lib/actions/photo.ts
+ POST / 200 in 32ms (next.js: 7ms, proxy.ts: 9ms, application-code: 16ms)
+  └─ ƒ incrementViews("bd6973e5-edc6-4703-8bd1-3cbff98b4575") in 1ms lib/actions/photo.ts
+ POST / 200 in 37ms (next.js: 10ms, proxy.ts: 9ms, application-code: 17ms)
+  └─ ƒ incrementViews("9d4fc013-6511-47af-ad87-2c9d5b4a3ad8") in 1ms lib/actions/photo.ts
+ POST / 200 in 41ms (next.js: 8ms, proxy.ts: 10ms, application-code: 23ms)
+  └─ ƒ incrementViews("6f889e75-9266-4259-94b6-a9af4508b22c") in 1ms lib/actions/photo.ts
+ POST / 200 in 36ms (next.js: 9ms, proxy.ts: 11ms, application-code: 17ms)
+  └─ ƒ incrementViews("ddb773f0-b39c-471e-813c-038e8058473a") in 1ms lib/actions/photo.ts
+ POST / 200 in 179ms (next.js: 33ms, proxy.ts: 26ms, application-code: 120ms)
+  └─ ƒ incrementViews("15341bf3-1ba0-4177-815d-d1ef098223c8") in 2ms lib/actions/photo.ts
+ POST / 200 in 115ms (next.js: 32ms, proxy.ts: 47ms, application-code: 36ms)
+  └─ ƒ incrementViews("31f8dd91-c2d0-42fe-8605-ee2c3082593d") in 1ms lib/actions/photo.ts
+ POST / 200 in 54ms (next.js: 13ms, proxy.ts: 12ms, application-code: 29ms)
+  └─ ƒ incrementViews("a5aa006e-4e04-4b6c-89d3-4d5bb02120b3") in 2ms lib/actions/photo.ts
+ POST / 200 in 52ms (next.js: 14ms, proxy.ts: 17ms, application-code: 21ms)
+  └─ ƒ incrementViews("8114f56f-c10c-4597-b7dd-b0331fb6f159") in 1ms lib/actions/photo.ts
+✓ Compiled in 153ms
+ GET / 200 in 818ms (next.js: 221ms, proxy.ts: 92ms, application-code: 505ms)
+ GET / 200 in 445ms (next.js: 11ms, proxy.ts: 18ms, application-code: 416ms)
+ GET / 200 in 423ms (next.js: 63ms, proxy.ts: 80ms, application-code: 280ms)
+ GET / 200 in 422ms (next.js: 103ms, proxy.ts: 79ms, application-code: 240ms)
+ GET / 200 in 430ms (next.js: 19ms, proxy.ts: 81ms, application-code: 330ms)
+ GET / 200 in 476ms (next.js: 154ms, proxy.ts: 78ms, application-code: 244ms)
+ GET / 200 in 305ms (next.js: 15ms, proxy.ts: 13ms, application-code: 277ms)
+ GET / 200 in 236ms (next.js: 18ms, proxy.ts: 18ms, application-code: 200ms)
+ GET / 200 in 153ms (next.js: 11ms, proxy.ts: 35ms, application-code: 107ms)
+ GET / 200 in 135ms (next.js: 48ms, proxy.ts: 17ms, application-code: 71ms)
+✓ Compiled in 84ms
+ GET / 200 in 622ms (next.js: 202ms, proxy.ts: 58ms, application-code: 363ms)
+ GET / 200 in 413ms (next.js: 9ms, proxy.ts: 15ms, application-code: 389ms)
+ GET / 200 in 338ms (next.js: 17ms, proxy.ts: 67ms, application-code: 254ms)
+ GET / 200 in 340ms (next.js: 62ms, proxy.ts: 67ms, application-code: 211ms)
+ GET / 200 in 341ms (next.js: 93ms, proxy.ts: 67ms, application-code: 180ms)
+ GET / 200 in 387ms (next.js: 134ms, proxy.ts: 67ms, application-code: 186ms)
+ GET / 200 in 266ms (next.js: 9ms, proxy.ts: 15ms, application-code: 243ms)
+ GET / 200 in 209ms (next.js: 19ms, proxy.ts: 9ms, application-code: 181ms)
+ GET / 200 in 142ms (next.js: 12ms, proxy.ts: 31ms, application-code: 100ms)
+ GET / 200 in 141ms (next.js: 46ms, proxy.ts: 29ms, application-code: 65ms)
+✓ Compiled in 200ms
+ GET / 200 in 877ms (next.js: 186ms, proxy.ts: 64ms, application-code: 627ms)
+ GET / 200 in 879ms (next.js: 21ms, proxy.ts: 249ms, application-code: 610ms)
+ GET /api/me 200 in 110ms (next.js: 71ms, proxy.ts: 15ms, application-code: 24ms)
+ GET /api/me 200 in 108ms (next.js: 78ms, proxy.ts: 13ms, application-code: 17ms)
+ POST / 200 in 63ms (next.js: 10ms, proxy.ts: 12ms, application-code: 41ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 2ms lib/actions/photo.ts
+ POST / 200 in 32ms (next.js: 9ms, proxy.ts: 7ms, application-code: 17ms)
+  └─ ƒ incrementViews("4fb4dc3b-ae16-41f4-9e67-ab420ad23a2f") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 8ms, proxy.ts: 10ms, application-code: 13ms)
+  └─ ƒ incrementViews("1e1eba18-755d-473f-bc43-151bc45a43d5") in 1ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 8ms, proxy.ts: 8ms, application-code: 15ms)
+  └─ ƒ incrementViews("0bf22729-05a0-4af6-a648-e39a61129fae") in 1ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 7ms, proxy.ts: 9ms, application-code: 11ms)
+  └─ ƒ incrementViews("d413a8f4-9558-4644-bcc7-cbf256f5c762") in 1ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 6ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("f33d5162-c96d-48fd-88b0-813cd5c7f2e6") in 1ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 7ms, proxy.ts: 5ms, application-code: 13ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 5ms, proxy.ts: 5ms, application-code: 14ms)
+  └─ ƒ incrementViews("52430912-a647-448f-a5e0-b350267be7bc") in 0ms lib/actions/photo.ts
+ POST / 200 in 34ms (next.js: 7ms, proxy.ts: 11ms, application-code: 16ms)
+  └─ ƒ incrementViews("58b7b459-7e22-4325-9374-f8f28bf9d92f") in 1ms lib/actions/photo.ts
+ POST / 200 in 37ms (next.js: 10ms, proxy.ts: 11ms, application-code: 16ms)
+  └─ ƒ incrementViews("6cd3c09c-7cbf-4260-b93c-d336b259f317") in 1ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 6ms, proxy.ts: 9ms, application-code: 16ms)
+  └─ ƒ incrementViews("392f21e0-1e46-4a82-a63a-67787c58765e") in 1ms lib/actions/photo.ts
+ POST / 200 in 32ms (next.js: 9ms, proxy.ts: 11ms, application-code: 12ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 6ms, proxy.ts: 11ms, application-code: 9ms)
+  └─ ƒ incrementViews("4439726e-549e-4181-8d34-9213bdcf91e1") in 1ms lib/actions/photo.ts
+ POST / 200 in 29ms (next.js: 8ms, proxy.ts: 9ms, application-code: 13ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 6ms, proxy.ts: 6ms, application-code: 11ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 6ms, proxy.ts: 8ms, application-code: 12ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 7ms, proxy.ts: 6ms, application-code: 13ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 0ms lib/actions/photo.ts
+ POST / 200 in 47ms (next.js: 12ms, proxy.ts: 5ms, application-code: 29ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 9ms, proxy.ts: 6ms, application-code: 11ms)
+  └─ ƒ incrementViews("0d1c79f4-75ff-4917-9a6f-4bb31fb147a7") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 6ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("18a37130-d348-44e7-8869-5808461dc115") in 1ms lib/actions/photo.ts
+ POST / 200 in 20ms (next.js: 5ms, proxy.ts: 6ms, application-code: 9ms)
+  └─ ƒ incrementViews("ff1152c8-e2ca-4265-b45e-b5a16cfa4bb5") in 0ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 7ms, proxy.ts: 9ms, application-code: 10ms)
+  └─ ƒ incrementViews("bd6973e5-edc6-4703-8bd1-3cbff98b4575") in 0ms lib/actions/photo.ts
+ POST / 200 in 27ms (next.js: 8ms, proxy.ts: 6ms, application-code: 13ms)
+  └─ ƒ incrementViews("6a11cf49-4af8-4dcd-831d-2219f1d6f323") in 1ms lib/actions/photo.ts
+ POST / 200 in 21ms (next.js: 5ms, proxy.ts: 5ms, application-code: 10ms)
+  └─ ƒ incrementViews("6f889e75-9266-4259-94b6-a9af4508b22c") in 0ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 5ms, proxy.ts: 7ms, application-code: 10ms)
+  └─ ƒ incrementViews("9d4fc013-6511-47af-ad87-2c9d5b4a3ad8") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 9ms, proxy.ts: 8ms, application-code: 11ms)
+  └─ ƒ incrementViews("ddb773f0-b39c-471e-813c-038e8058473a") in 0ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 7ms, proxy.ts: 9ms, application-code: 9ms)
+  └─ ƒ incrementViews("15341bf3-1ba0-4177-815d-d1ef098223c8") in 0ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 5ms, proxy.ts: 5ms, application-code: 11ms)
+  └─ ƒ incrementViews("31f8dd91-c2d0-42fe-8605-ee2c3082593d") in 1ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 10ms, proxy.ts: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("8114f56f-c10c-4597-b7dd-b0331fb6f159") in 1ms lib/actions/photo.ts
+ POST / 200 in 28ms (next.js: 7ms, proxy.ts: 6ms, application-code: 14ms)
+  └─ ƒ incrementViews("a5aa006e-4e04-4b6c-89d3-4d5bb02120b3") in 1ms lib/actions/photo.ts
+ GET / 200 in 282ms (next.js: 6ms, proxy.ts: 6ms, application-code: 269ms)
+ GET /api/me 200 in 53ms (next.js: 16ms, proxy.ts: 16ms, application-code: 21ms)
+ GET /api/me 200 in 60ms (next.js: 26ms, proxy.ts: 15ms, application-code: 18ms)
+ POST / 200 in 31ms (next.js: 7ms, proxy.ts: 8ms, application-code: 17ms)
+  └─ ƒ incrementViews("bd6973e5-edc6-4703-8bd1-3cbff98b4575") in 1ms lib/actions/photo.ts
+ POST / 200 in 23ms (next.js: 5ms, proxy.ts: 9ms, application-code: 9ms)
+  └─ ƒ incrementViews("392f21e0-1e46-4a82-a63a-67787c58765e") in 0ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 10ms, proxy.ts: 10ms, application-code: 12ms)
+  └─ ƒ incrementViews("ff1152c8-e2ca-4265-b45e-b5a16cfa4bb5") in 1ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 6ms, proxy.ts: 7ms, application-code: 11ms)
+  └─ ƒ incrementViews("6cd3c09c-7cbf-4260-b93c-d336b259f317") in 1ms lib/actions/photo.ts
+ POST / 200 in 26ms (next.js: 6ms, proxy.ts: 9ms, application-code: 11ms)
+  └─ ƒ incrementViews("d413a8f4-9558-4644-bcc7-cbf256f5c762") in 1ms lib/actions/photo.ts
+ POST / 200 in 32ms (next.js: 6ms, proxy.ts: 9ms, application-code: 17ms)
+  └─ ƒ incrementViews("0d1c79f4-75ff-4917-9a6f-4bb31fb147a7") in 0ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 10ms, proxy.ts: 8ms, application-code: 12ms)
+  └─ ƒ incrementViews("18a37130-d348-44e7-8869-5808461dc115") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 5ms, proxy.ts: 6ms, application-code: 10ms)
+  └─ ƒ incrementViews("1e1eba18-755d-473f-bc43-151bc45a43d5") in 1ms lib/actions/photo.ts
+ POST / 200 in 22ms (next.js: 4ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ incrementViews("52430912-a647-448f-a5e0-b350267be7bc") in 1ms lib/actions/photo.ts
+ POST / 200 in 25ms (next.js: 6ms, proxy.ts: 5ms, application-code: 13ms)
+  └─ ƒ incrementViews("f33d5162-c96d-48fd-88b0-813cd5c7f2e6") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 6ms, proxy.ts: 8ms, application-code: 16ms)
+  └─ ƒ incrementViews("58b7b459-7e22-4325-9374-f8f28bf9d92f") in 1ms lib/actions/photo.ts
+ POST / 200 in 19ms (next.js: 5ms, proxy.ts: 5ms, application-code: 9ms)
+  └─ ƒ incrementViews("0bf22729-05a0-4af6-a648-e39a61129fae") in 0ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 7ms, proxy.ts: 10ms, application-code: 12ms)
+  └─ ƒ incrementViews("4439726e-549e-4181-8d34-9213bdcf91e1") in 1ms lib/actions/photo.ts
+ POST / 200 in 31ms (next.js: 8ms, proxy.ts: 9ms, application-code: 14ms)
+  └─ ƒ incrementViews("4fb4dc3b-ae16-41f4-9e67-ab420ad23a2f") in 1ms lib/actions/photo.ts
+ POST / 200 in 30ms (next.js: 7ms, proxy.ts: 10ms, application-code: 13ms)
+  └─ ƒ incrementViews("3b6e1c5c-3c8a-4ec7-a643-1654aa32e07f") in 1ms lib/actions/photo.ts
+ POST / 200 in 45ms (next.js: 8ms, proxy.ts: 9ms, application-code: 27ms)
+  └─ ƒ incrementViews("daf2e15b-c9a8-43de-845d-22a41db19ef8") in 1ms lib/actions/photo.ts
+ POST / 200 in 33ms (next.js: 8ms, proxy.ts: 11ms, application-code: 14ms)
+  └─ ƒ incrementViews("a145f6df-1612-470c-86ec-b99f2b9e1e2d") in 1ms lib/actions/photo.ts
+ POST / 200 in 33ms (next.js: 9ms, proxy.ts: 9ms, application-code: 15ms)
+  └─ ƒ incrementViews("db25f585-9756-4332-b3f4-38f924562093") in 1ms lib/actions/photo.ts
+ GET /me 200 in 217ms (next.js: 160ms, proxy.ts: 9ms, application-code: 48ms)
+ GET /me 200 in 52ms (next.js: 6ms, proxy.ts: 5ms, application-code: 42ms)
+ GET / 200 in 45ms (next.js: 7ms, proxy.ts: 6ms, application-code: 32ms)
+ POST / 200 in 34ms (next.js: 11ms, proxy.ts: 8ms, application-code: 16ms)
+  └─ ƒ incrementViews("29624c47-aabf-4e0d-80b0-4aab3efc4788") in 0ms lib/actions/photo.ts
+ POST / 200 in 24ms (next.js: 7ms, proxy.ts: 7ms, application-code: 9ms)
+  └─ ƒ incrementViews("2a4ca5c9-fe31-4a1b-bc04-b218662e5ea3") in 0ms lib/actions/photo.ts
+ POST / 200 in 20ms (next.js: 5ms, proxy.ts: 5ms, application-code: 10ms)
+  └─ ƒ incrementViews("e3701a7a-608c-43d9-a93f-30dc5688a021") in 0ms lib/actions/photo.ts
+ POST / 200 in 18ms (next.js: 5ms, proxy.ts: 5ms, application-code: 8ms)
+  └─ ƒ incrementViews("8e27c5e4-6f8a-45ba-aacb-e9bdc7266550") in 0ms lib/actions/photo.ts
+  Reload env: .env.local
+✓ Compiled in 226ms
+○ Compiling proxy ...
+ GET / 200 in 357ms (next.js: 202ms, proxy.ts: 63ms, application-code: 92ms)
+ GET / 200 in 415ms (next.js: 137ms, proxy.ts: 18ms, application-code: 260ms)
+ GET / 200 in 737ms (next.js: 123ms, proxy.ts: 266ms, application-code: 347ms)
+ GET /api/me 200 in 136ms (next.js: 110ms, proxy.ts: 13ms, application-code: 13ms)
+ GET /api/me 200 in 145ms (next.js: 125ms, proxy.ts: 11ms, application-code: 8ms)
+✓ Compiled in 228ms
+ GET / 200 in 1062ms (next.js: 216ms, proxy.ts: 466ms, application-code: 380ms)
+ GET / 200 in 688ms (next.js: 26ms, proxy.ts: 258ms, application-code: 403ms)
+ GET /api/me 200 in 146ms (next.js: 79ms, proxy.ts: 13ms, application-code: 53ms)
+ GET /api/me 200 in 148ms (next.js: 93ms, proxy.ts: 13ms, application-code: 42ms)
+  Reload env: .env.local
+��ֹ������������(Y/N)? 
 [?25h

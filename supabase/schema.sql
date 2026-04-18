@@ -25,6 +25,7 @@ create table if not exists public.photos (
   height integer default 0,
   views integer default 0,
   likes integer default 0,
+  file_hash text,
   created_at timestamptz default now() not null
 );
 

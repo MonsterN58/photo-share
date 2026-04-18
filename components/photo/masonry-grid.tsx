@@ -3,15 +3,6 @@
 import { PhotoCard } from "./photo-card";
 import type { Photo } from "@/types";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { createClient } from "@/lib/supabase/client";
-
-type ProfileSearchRow = {
-  id: string;
-};
-
-type PhotoLikeRow = {
-  photo_id: string;
-};
 
 interface MasonryGridProps {
   initialPhotos: Photo[];
@@ -96,65 +87,18 @@ export function MasonryGrid({ initialPhotos, query, sort, userId }: MasonryGridP
     if (loading || !hasMore) return;
     setLoading(true);
 
-    const supabase = createClient();
-    let searchFilters: string[] = [];
-    if (query) {
-      const safeQuery = query.replace(/[%_,()]/g, " ").trim();
-      const { data: matchedProfiles } = await supabase
-        .from("profiles")
-        .select("id")
-        .ilike("username", `%${safeQuery}%`);
-      const authorIds =
-        (matchedProfiles as ProfileSearchRow[] | null)?.map((profile) => profile.id).filter(Boolean) || [];
+    const params = new URLSearchParams({
+      page: String(page),
+      sort: sort || "latest",
+    });
+    if (query) params.set("query", query);
+    if (userId) params.set("userId", userId);
 
-      searchFilters = [
-        `title.ilike.%${safeQuery}%`,
-        `description.ilike.%${safeQuery}%`,
-        ...(authorIds.length > 0 ? [`user_id.in.(${authorIds.join(",")})`] : []),
-      ];
-    }
-
-    let qb = supabase
-      .from("photos")
-      .select("*, profiles(*)")
-      .eq("is_public", true)
-      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
-    if (searchFilters.length > 0) {
-      qb = qb.or(searchFilters.join(","));
-    }
-    if (userId) {
-      qb = qb.eq("user_id", userId);
-    }
-    if (sort === "popular") {
-      qb = qb.order("likes", { ascending: false }).order("views", { ascending: false });
-    } else {
-      qb = qb.order("created_at", { ascending: false });
-    }
-
-    const { data } = await qb;
-    let newPhotos = (data as Photo[]) || [];
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user && newPhotos.length > 0) {
-      const { data: likedRows } = await supabase
-        .from("photo_likes")
-        .select("photo_id")
-        .eq("user_id", user.id)
-        .in(
-          "photo_id",
-          newPhotos.map((photo) => photo.id)
-        );
-      const likedIds = new Set(
-        (likedRows as PhotoLikeRow[] | null)?.map((row) => row.photo_id) || []
-      );
-      newPhotos = newPhotos.map((photo) => ({
-        ...photo,
-        has_liked: likedIds.has(photo.id),
-      }));
-    }
+    const response = await fetch(`/api/photos?${params.toString()}`, {
+      cache: "no-store",
+    });
+    const payload = (await response.json()) as { photos?: Photo[] };
+    const newPhotos = payload.photos || [];
 
     if (newPhotos.length < PAGE_SIZE) setHasMore(false);
     setPhotos((prev) => {

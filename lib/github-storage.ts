@@ -1,10 +1,10 @@
 const GITHUB_API_BASE = process.env.GITHUB_API_PROXY?.trim() || "https://api.github.com";
 const DEFAULT_BRANCH = "main";
 const DEFAULT_IMAGE_DIR = "uploads";
-const INITIAL_REPO = "picture";
-const REPO_SIZE_LIMIT_KB = 3 * 1024 * 1024; // 3 GB（单位 KB，GitHub API 返回 KB）
+const DEFAULT_INITIAL_REPO = "picture";
+const REPO_SIZE_LIMIT_KB = 3 * 1024 * 1024;
 const MAX_REPO_COUNT = 100;
-const REPO_CACHE_TTL_MS = 30 * 60 * 1000; // 30 分钟重检一次
+const REPO_CACHE_TTL_MS = 30 * 60 * 1000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
@@ -18,6 +18,10 @@ function requireEnv(name: string): string {
   return value;
 }
 
+function getOptionalEnv(name: string, fallback: string): string {
+  return process.env[name]?.trim() || fallback;
+}
+
 function getFileExtension(filename: string): string {
   const lastDot = filename.lastIndexOf(".");
   if (lastDot === -1) return "webp";
@@ -26,38 +30,33 @@ function getFileExtension(filename: string): string {
 }
 
 function buildContentPath(filename: string): string {
-  const imageDir = process.env.GITHUB_IMAGE_DIR?.trim() || DEFAULT_IMAGE_DIR;
+  const imageDir = getOptionalEnv("GITHUB_IMAGE_DIR", DEFAULT_IMAGE_DIR);
   const now = new Date();
   const year = String(now.getUTCFullYear());
   const month = String(now.getUTCMonth() + 1).padStart(2, "0");
   const ext = getFileExtension(filename);
   const uniqueName = `${crypto.randomUUID()}.${ext}`;
 
-  return [imageDir, year, month, uniqueName]
-    .filter(Boolean)
+  return [imageDir, year, month, uniqueName].filter(Boolean).join("/");
+}
+
+function encodePath(path: string): string {
+  return path
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
     .join("/");
 }
 
 function buildRawUrl(owner: string, repo: string, branch: string, contentPath: string): string {
-  const encodedPath = contentPath
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
-
   return `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(
     repo
-  )}/${encodeURIComponent(branch)}/${encodedPath}`;
+  )}/${encodeURIComponent(branch)}/${encodePath(contentPath)}`;
 }
 
 function buildCdnUrl(owner: string, repo: string, branch: string, contentPath: string): string {
-  const encodedPath = contentPath
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
-
   return `https://cdn.jsdelivr.net/gh/${encodeURIComponent(owner)}/${encodeURIComponent(
     repo
-  )}@${encodeURIComponent(branch)}/${encodedPath}`;
+  )}@${encodeURIComponent(branch)}/${encodePath(contentPath)}`;
 }
 
 interface GitHubCreateFileResponse {
@@ -68,48 +67,52 @@ interface GitHubCreateFileResponse {
 }
 
 interface GitHubRepoInfo {
-  size: number;           // GitHub 返回的仓库大小，单位 KB
-  default_branch: string;
+  size?: number;
+  default_branch?: string;
+  private?: boolean;
 }
 
-/**
- * 带重试的 fetch 封装，兼容不挂代理时网络不稳定的情况。
- * 对网络错误和 5xx 错误进行重试，每次等待时间递增。
- */
 async function fetchWithRetry(
   url: string,
-  init: RequestInit,
+  init: RequestInit = {},
   retries = MAX_RETRIES
 ): Promise<Response> {
   let lastError: Error | null = null;
+
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const fetchOptions: RequestInit = { ...init };
       let timeout: ReturnType<typeof setTimeout> | undefined;
-      // AbortController may not exist in very old Node environments
+
       if (typeof AbortController !== "undefined") {
         const controller = new AbortController();
         timeout = setTimeout(() => controller.abort(), 30_000);
         fetchOptions.signal = controller.signal;
       }
+
       const response = await fetch(url, fetchOptions);
       if (timeout) clearTimeout(timeout);
-      // 5xx 服务端错误时重试
+
       if (response.status >= 500 && attempt < retries) {
-        await new Promise<void>((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1))
+        );
         continue;
       }
+
       return response;
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
       if (attempt < retries) {
-        await new Promise<void>((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1))
+        );
       }
     }
   }
+
   throw new Error(
-    `GitHub API 请求失败（已重试 ${retries} 次）: ${lastError?.message || "未知错误"}。` +
-    `如果你没有使用代理，可以在 .env.local 中设置 GITHUB_API_PROXY 为 GitHub API 镜像地址。`
+    `GitHub API 请求失败（已重试 ${retries} 次）: ${lastError?.message || "未知错误"}`
   );
 }
 
@@ -128,12 +131,19 @@ async function getRepoInfo(
       },
     }
   );
+
   if (response.status === 404) return null;
   if (!response.ok) {
-    throw new Error(`获取仓库信息失败 (${response.status})`);
+    const text = await response.text();
+    throw new Error(`获取 GitHub 仓库信息失败 (${response.status}): ${text}`);
   }
+
   const data = (await response.json()) as GitHubRepoInfo;
-  return { size: data.size, default_branch: data.default_branch };
+  return {
+    size: data.size ?? 0,
+    default_branch: data.default_branch || DEFAULT_BRANCH,
+    private: data.private,
+  };
 }
 
 async function createRepo(repoName: string, token: string): Promise<void> {
@@ -152,40 +162,41 @@ async function createRepo(repoName: string, token: string): Promise<void> {
       auto_init: true,
     }),
   });
+
   if (!response.ok) {
     const text = await response.text();
     throw new Error(`创建 GitHub 仓库 ${repoName} 失败: ${text}`);
   }
 }
 
-/**
- * 按顺序检测 picture → picture1 → picture2 → …，
- * 找到第一个存在且 < 3 GB 的仓库；若仓库不存在则自动创建。
- * 结果缓存 30 分钟，减少 API 调用。
- */
 async function resolveActiveRepo(owner: string, token: string): Promise<string> {
   if (activeRepoCache && Date.now() - activeRepoCache.checkedAt < REPO_CACHE_TTL_MS) {
     return activeRepoCache.repo;
   }
 
+  const initialRepo = getOptionalEnv("GITHUB_REPO_NAME", DEFAULT_INITIAL_REPO);
   const candidates = [
-    INITIAL_REPO,
-    ...Array.from({ length: MAX_REPO_COUNT }, (_, i) => `picture${i + 1}`),
+    initialRepo,
+    ...Array.from({ length: MAX_REPO_COUNT }, (_, i) =>
+      i === 0 ? `${initialRepo}1` : `${initialRepo}${i + 1}`
+    ),
   ];
 
   for (const repoName of candidates) {
     const info = await getRepoInfo(owner, repoName, token);
 
     if (info === null) {
-      // 仓库不存在，自动创建并使用
       await createRepo(repoName, token);
-      // 等待 GitHub 完成初始化（生成默认分支）
       await new Promise<void>((resolve) => setTimeout(resolve, 3000));
       activeRepoCache = { repo: repoName, checkedAt: Date.now() };
       return repoName;
     }
 
-    if (info.size < REPO_SIZE_LIMIT_KB) {
+    if (info.private) {
+      throw new Error(`GitHub 仓库 ${repoName} 不是公开仓库，前端无法直接展示图片`);
+    }
+
+    if ((info.size ?? 0) < REPO_SIZE_LIMIT_KB) {
       activeRepoCache = { repo: repoName, checkedAt: Date.now() };
       return repoName;
     }
@@ -200,15 +211,14 @@ export async function uploadToGitHub(
 ): Promise<{ url: string; path: string }> {
   const token = requireEnv("GITHUB_TOKEN");
   const owner = requireEnv("GITHUB_REPO_OWNER");
-  // 动态解析当前活跃仓库（自动容量检测 + 创建新仓库）
   const repo = await resolveActiveRepo(owner, token);
-  const branch = process.env.GITHUB_REPO_BRANCH?.trim() || DEFAULT_BRANCH;
+  const branch = getOptionalEnv("GITHUB_REPO_BRANCH", DEFAULT_BRANCH);
   const contentPath = buildContentPath(filename);
 
   const response = await fetchWithRetry(
     `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
       repo
-    )}/contents/${contentPath}`,
+    )}/contents/${encodePath(contentPath)}`,
     {
       method: "PUT",
       headers: {
@@ -232,14 +242,10 @@ export async function uploadToGitHub(
 
   const result = (await response.json()) as GitHubCreateFileResponse;
   const uploadedPath = result.content?.path || contentPath;
-  const fallbackUrl =
-    result.content?.download_url || buildRawUrl(owner, repo, branch, uploadedPath);
+  const rawUrl = result.content?.download_url || buildRawUrl(owner, repo, branch, uploadedPath);
   const url = process.env.GITHUB_IMAGE_CDN === "raw"
-    ? fallbackUrl
+    ? rawUrl
     : buildCdnUrl(owner, repo, branch, uploadedPath);
 
-  return {
-    url,
-    path: uploadedPath,
-  };
+  return { url, path: uploadedPath };
 }

@@ -11,7 +11,6 @@ export function useCaptureGuard(enabled: boolean) {
 
   useEffect(() => {
     if (!enabled) {
-      setIsObscured(false);
       return;
     }
 
@@ -58,5 +57,5 @@ export function useCaptureGuard(enabled: boolean) {
     };
   }, [enabled]);
 
-  return { isObscured };
+  return { isObscured: enabled && isObscured };
 }

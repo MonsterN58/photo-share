@@ -17,16 +17,22 @@ import {
   Eye,
   EyeOff,
   FolderPlus,
+  Heart,
+  ImageIcon,
   Images,
   Loader2,
+  MoreHorizontal,
   Pencil,
   Trash2,
+  BookImage,
 } from "lucide-react";
 import { toast } from "sonner";
 import { deletePhoto, deletePhotos, updatePhoto } from "@/lib/actions/photo";
 import { assignPhotosToAlbum, createAlbum, deleteAlbum } from "@/lib/actions/album";
-import { uploadAvatar } from "@/lib/actions/profile";
+import { publishPortfolio, updatePortfolioCover } from "@/lib/actions/portfolio";
+import { uploadAvatar, uploadCover, updateProfileInfo } from "@/lib/actions/profile";
 import { ShareButton } from "@/components/photo/share-button";
+import { CoverCollage } from "@/components/photo/cover-collage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +52,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useBoxSelect } from "@/hooks/use-box-select";
-import type { Album, Photo, Profile } from "@/types";
+import { parseCoverUrls, serializeCoverUrls } from "@/lib/cover";
+import type { Album, Photo, Portfolio, Profile } from "@/types";
 
 type View =
   | { kind: "all-photos" }
@@ -60,15 +67,18 @@ interface MyPhotosClientProps {
   photos: Photo[];
   albums: Album[];
   profile: Profile | null;
+  portfolios?: Portfolio[];
 }
 
 export function MyPhotosClient({
   photos: initialPhotos,
   albums: initialAlbums,
   profile: initialProfile,
+  portfolios: initialPortfolios = [],
 }: MyPhotosClientProps) {
   const [photos, setPhotos] = useState(initialPhotos);
   const [albums, setAlbums] = useState(initialAlbums);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>(initialPortfolios);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialProfile?.avatar_url ?? null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [view, setView] = useState<View>({ kind: "all-photos" });
@@ -291,6 +301,25 @@ export function MyPhotosClient({
     });
   };
 
+  const handlePublishPortfolio = (albumId: string, albumName: string) => {
+    const coverUrls = getDefaultAlbumCoverPhotos(photos.filter((p) => p.album_id === albumId)).map((photo) => photo.url);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set("album_id", albumId);
+      formData.set("title", albumName);
+      formData.set("description", "");
+      formData.set("cover_url", serializeCoverUrls(coverUrls));
+      formData.set("is_public", "true");
+      const result = await publishPortfolio(formData);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(`相册「${albumName}」已发布为作品集`);
+        router.refresh();
+      }
+    });
+  };
+
   const handleDropToCreateAlbum = (draggedPhotoId: string, targetPhotoId: string) => {
     if (draggedPhotoId === targetPhotoId) return;
     setPendingPhotoIds([draggedPhotoId, targetPhotoId]);
@@ -412,13 +441,22 @@ export function MyPhotosClient({
           </div>
           <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
         </label>
-        <div>
-          <h1 className="text-lg font-bold text-gray-900">{initialProfile?.username || "我的主页"}</h1>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-bold text-gray-900">{initialProfile?.username || "我的主页"}</h1>
+            <Link href={`/user/${initialProfile?.id}`}>
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-gray-400 hover:text-gray-700 text-xs gap-1">
+                <ExternalLink className="h-3 w-3" />
+                查看主页
+              </Button>
+            </Link>
+          </div>
           <p className="text-sm text-gray-500 mt-0.5">
             {albums.length} 个相册 · {photos.length} 张照片
           </p>
           <p className="text-xs text-gray-400 mt-1">点击头像可更换</p>
         </div>
+        <EditProfileDialog profile={initialProfile} />
       </div>
       <div className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
@@ -571,6 +609,7 @@ export function MyPhotosClient({
                 isDropTarget={dropAlbumId === item.album.id}
                 canDrop={Boolean(draggingPhotoId)}
                 isPending={isPending}
+                portfolio={portfolios.find((p) => p.album_id === item.album.id)}
                 onOpen={() =>
                   setView({
                     kind: "album-photos",
@@ -580,6 +619,12 @@ export function MyPhotosClient({
                 }
                 onToggle={() => toggleAlbumSelection(item.photos)}
                 onDelete={() => handleDeleteAlbum(item.album.id, item.album.name)}
+                onPublish={() => handlePublishPortfolio(item.album.id, item.album.name)}
+                onCoverChanged={(portfolioId, coverUrl) =>
+                  setPortfolios((prev) =>
+                    prev.map((p) => (p.id === portfolioId ? { ...p, cover_url: coverUrl } : p))
+                  )
+                }
                 onDragEnter={() => setDropAlbumId(item.album.id)}
                 onDragLeave={() =>
                   setDropAlbumId((current) => (current === item.album.id ? null : current))
@@ -627,6 +672,18 @@ export function MyPhotosClient({
   );
 }
 
+function sortPhotosForCover(photos: Photo[]) {
+  return [...photos]
+    .sort((a, b) => {
+      if ((b.likes ?? 0) !== (a.likes ?? 0)) return (b.likes ?? 0) - (a.likes ?? 0);
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+}
+
+function getDefaultAlbumCoverPhotos(photos: Photo[]) {
+  return sortPhotosForCover(photos).slice(0, 4);
+}
+
 function AlbumCollectionTile({
   album,
   photos,
@@ -634,9 +691,12 @@ function AlbumCollectionTile({
   isDropTarget,
   canDrop,
   isPending,
+  portfolio,
   onOpen,
   onToggle,
   onDelete,
+  onPublish,
+  onCoverChanged,
   onDragEnter,
   onDragLeave,
   onDropPhoto,
@@ -647,15 +707,73 @@ function AlbumCollectionTile({
   isDropTarget: boolean;
   canDrop: boolean;
   isPending: boolean;
+  portfolio?: Portfolio;
   onOpen: () => void;
   onToggle: () => void;
   onDelete: () => void;
+  onPublish: () => void;
+  onCoverChanged?: (portfolioId: string, coverUrl: string) => void;
   onDragEnter: () => void;
   onDragLeave: () => void;
   onDropPhoto: (photoId: string) => void;
 }) {
-  const previews = photos.slice(0, 4);
+  const previews = getDefaultAlbumCoverPhotos(photos);
   const fullySelected = selectedCount === photos.length;
+  const [coverPickerOpen, setCoverPickerOpen] = useState(false);
+  const [selectedCoverUrls, setSelectedCoverUrls] = useState<string[]>([]);
+  const [, startCoverTransition] = useTransition();
+
+  const sortedForCover = useMemo(() => sortPhotosForCover(photos), [photos]);
+  const currentCoverUrls = useMemo(() => parseCoverUrls(portfolio?.cover_url), [portfolio?.cover_url]);
+
+  const getInitialCoverSelection = () => {
+    const photoUrls = new Set(photos.map((photo) => photo.url));
+    const initialUrls = currentCoverUrls.filter((url) => photoUrls.has(url)).slice(0, 4);
+    return initialUrls.length > 0 ? initialUrls : sortedForCover.slice(0, 1).map((photo) => photo.url);
+  };
+
+  const openCoverPicker = () => {
+    setSelectedCoverUrls(getInitialCoverSelection());
+    setCoverPickerOpen(true);
+  };
+
+  const handleToggleCover = (photo: Photo) => {
+    setSelectedCoverUrls((prev) => {
+      if (prev.includes(photo.url)) {
+        if (prev.length === 1) {
+          toast.error("至少选择 1 张封面");
+          return prev;
+        }
+        return prev.filter((url) => url !== photo.url);
+      }
+      if (prev.length >= 4) {
+        toast.error("最多选择 4 张封面");
+        return prev;
+      }
+      return [...prev, photo.url];
+    });
+  };
+
+  const handleSaveCover = () => {
+    if (!portfolio) return;
+    if (selectedCoverUrls.length < 1 || selectedCoverUrls.length > 4) {
+      toast.error("请选择 1-4 张封面");
+      return;
+    }
+    const nextCoverUrl = serializeCoverUrls(selectedCoverUrls);
+    const prevCoverUrl = portfolio.cover_url;
+    onCoverChanged?.(portfolio.id, nextCoverUrl);
+    setCoverPickerOpen(false);
+    startCoverTransition(async () => {
+      const result = await updatePortfolioCover(portfolio.id, nextCoverUrl);
+      if (result.error) {
+        onCoverChanged?.(portfolio.id, prevCoverUrl ?? "");
+        toast.error(result.error);
+      } else {
+        toast.success("封面已更换");
+      }
+    });
+  };
 
   return (
     <div
@@ -707,26 +825,12 @@ function AlbumCollectionTile({
         className="block w-full text-left"
       >
         <div className="relative aspect-square bg-gray-100">
-          <div className="grid h-full grid-cols-2 grid-rows-2 gap-0.5">
-            {previews.map((photo, index) => (
-              <div
-                key={photo.id}
-                className={`relative overflow-hidden bg-gray-100 ${
-                  previews.length === 1 ? "col-span-2 row-span-2" : ""
-                } ${previews.length === 2 ? "row-span-2" : ""} ${
-                  previews.length === 3 && index === 0 ? "row-span-2" : ""
-                }`}
-              >
-                <Image
-                  src={photo.url}
-                  alt={photo.title}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                  sizes="(max-width: 640px) 50vw, 25vw"
-                />
-              </div>
-            ))}
-          </div>
+          <CoverCollage
+            urls={previews.map((photo) => photo.url)}
+            alt={album.name}
+            sizes="(max-width: 640px) 50vw, 25vw"
+            imageClassName="transition-transform duration-300 group-hover:scale-[1.02]"
+          />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent p-3">
             <p className="truncate text-sm font-semibold text-white">{album.name}</p>
             <p className="mt-0.5 text-xs text-white/75">{photos.length} 张照片</p>
@@ -746,19 +850,164 @@ function AlbumCollectionTile({
         <div className="flex items-center justify-between gap-2 px-3 py-2">
           <span className="truncate text-xs text-gray-500">{album.description || "相册"}</span>
           <div className="flex items-center gap-1">
+            {/* Desktop hover buttons */}
+            {portfolio && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); openCoverPicker(); }}
+                disabled={isPending || photos.length === 0}
+                className="hidden sm:flex h-6 w-6 items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-purple-500 hover:bg-purple-50"
+                aria-label="更换作品集封面"
+                title="更换作品集封面"
+              >
+                <ImageIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onPublish(); }}
+              disabled={isPending}
+              className="hidden sm:flex h-6 w-6 items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-blue-500 hover:bg-blue-50"
+              aria-label="发布为作品集"
+              title="发布为作品集"
+            >
+              <BookImage className="h-3.5 w-3.5" />
+            </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
               disabled={isPending}
-              className="h-6 w-6 flex items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:bg-red-50"
+              className="hidden sm:flex h-6 w-6 items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:bg-red-50"
               aria-label="删除相册"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
+            {/* Mobile: always-visible "..." menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <button
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    className="sm:hidden h-6 w-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                    aria-label="更多操作"
+                  />
+                }
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem
+                  onClick={(e) => { e.stopPropagation(); onPublish(); }}
+                  disabled={isPending}
+                  className="gap-2"
+                >
+                  <BookImage className="h-4 w-4 text-blue-500" />
+                  {portfolio ? "已发布为作品集" : "发布为作品集"}
+                </DropdownMenuItem>
+                {portfolio && (
+                  <DropdownMenuItem
+                    onClick={(e) => { e.stopPropagation(); openCoverPicker(); }}
+                    disabled={isPending || photos.length === 0}
+                    className="gap-2"
+                  >
+                    <ImageIcon className="h-4 w-4 text-purple-500" />
+                    更换封面
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  disabled={isPending}
+                  className="gap-2 text-red-500 focus:text-red-500"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  删除相册
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <AlbumIcon className="h-3.5 w-3.5 shrink-0 text-gray-300" />
           </div>
         </div>
       </div>
+
+      {portfolio && (
+        <Dialog open={coverPickerOpen} onOpenChange={setCoverPickerOpen}>
+          <DialogContent className="max-w-md gap-0 overflow-hidden p-0 sm:max-w-lg">
+            <DialogHeader className="px-5 pb-3 pt-5">
+              <DialogTitle>更换封面</DialogTitle>
+              <p className="text-sm text-gray-400">选择 1-4 张照片，封面会按数量自动拼接</p>
+            </DialogHeader>
+            <div className="border-y border-gray-100 px-5 py-3">
+              <div className="relative aspect-[3/2] overflow-hidden rounded-lg bg-gray-100">
+                <CoverCollage
+                  urls={selectedCoverUrls}
+                  alt={`${album.name} 封面预览`}
+                  sizes="(max-width: 640px) 100vw, 540px"
+                />
+              </div>
+              <p className="mt-2 text-xs text-gray-400">已选 {selectedCoverUrls.length}/4</p>
+            </div>
+            <div className="max-h-[45vh] overflow-y-auto px-5 py-4">
+              <div className="grid grid-cols-3 gap-2">
+                {sortedForCover.map((photo) => {
+                  const selectedIndex = selectedCoverUrls.indexOf(photo.url);
+                  const isCurrent = selectedIndex !== -1;
+                  return (
+                    <button
+                      key={photo.id}
+                      type="button"
+                      onClick={() => handleToggleCover(photo)}
+                      className={`group relative aspect-square overflow-hidden rounded-lg border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                        isCurrent
+                          ? "border-blue-500"
+                          : "border-transparent hover:border-gray-300"
+                      }`}
+                    >
+                      <Image
+                        src={photo.url}
+                        alt={photo.title}
+                        fill
+                        className="object-cover transition-transform duration-200 group-hover:scale-105"
+                        sizes="(max-width: 640px) 33vw, 180px"
+                      />
+                      {isCurrent ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-blue-500/20">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 shadow-md">
+                            <span className="text-xs font-semibold text-white">{selectedIndex + 1}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="absolute inset-0 flex items-end justify-center bg-transparent pb-2 transition-colors group-hover:bg-black/25">
+                          <span
+                            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
+                            style={{ background: "rgba(0,0,0,.45)" }}
+                          >
+                            设为封面
+                          </span>
+                        </div>
+                      )}
+                      {photo.likes > 0 && (
+                        <span className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white">
+                          <Heart className="h-3 w-3 fill-current" />
+                          {photo.likes}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 px-5 pb-5">
+              <Button variant="outline" onClick={() => setCoverPickerOpen(false)}>
+                取消
+              </Button>
+              <Button onClick={handleSaveCover} disabled={selectedCoverUrls.length < 1 || selectedCoverUrls.length > 4}>
+                保存封面
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
@@ -1154,6 +1403,121 @@ function EditDialog({
               取消
             </Button>
             <Button onClick={handleSave}>保存</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditProfileDialog({ profile }: { profile: Profile | null }) {
+  const [open, setOpen] = useState(false);
+  const [username, setUsername] = useState(profile?.username || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const handleSave = () => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set("username", username);
+      formData.set("bio", bio);
+      const result = await updateProfileInfo(formData);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("个人信息已更新");
+        window.dispatchEvent(new Event("profile-updated"));
+        router.refresh();
+        setOpen(false);
+      }
+    });
+  };
+
+  const handleCoverUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setCoverUploading(true);
+    const formData = new FormData();
+    formData.set("cover", file);
+    const result = await uploadCover(formData);
+    setCoverUploading(false);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("封面已更新");
+      router.refresh();
+    }
+    event.target.value = "";
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button variant="outline" size="sm" className="gap-1.5 shrink-0" />
+        }
+      >
+        <Pencil className="h-3.5 w-3.5" />
+        编辑资料
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>编辑个人资料</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2">
+            <Label>用户名</Label>
+            <Input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              maxLength={30}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>个人简介</Label>
+            <Textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={3}
+              className="resize-none"
+              maxLength={200}
+              placeholder="介绍一下自己..."
+            />
+            <p className="text-xs text-gray-400 text-right">{bio.length}/200</p>
+          </div>
+          <div className="space-y-2">
+            <Label>个人主页封面</Label>
+            <label className="inline-flex cursor-pointer">
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium shadow-xs hover:bg-accent hover:text-accent-foreground transition-colors">
+                {coverUploading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Camera className="h-3.5 w-3.5" />
+                )}
+                {coverUploading ? "上传中..." : "上传封面图片"}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCoverUpload}
+                disabled={coverUploading}
+              />
+            </label>
+            <p className="text-xs text-gray-400">推荐尺寸 1920x480，最大 10MB</p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              取消
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={!username.trim() || isPending}
+            >
+              保存
+            </Button>
           </div>
         </div>
       </DialogContent>

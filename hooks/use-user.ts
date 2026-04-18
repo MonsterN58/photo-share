@@ -1,103 +1,65 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
-import { useEffect, useRef, useState } from "react";
-import type { AuthChangeEvent, Session, User, UserResponse } from "@supabase/supabase-js";
-import type { Profile } from "@/types";
+import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import type { LocalUser, Profile } from "@/types";
 
 interface UseUserOptions {
-  initialUser?: User | null;
+  initialUser?: LocalUser | null;
   initialProfile?: Profile | null;
 }
 
 export function useUser({ initialUser = null, initialProfile = null }: UseUserOptions = {}) {
-  const [user, setUser] = useState<User | null>(initialUser);
+  const [user, setUser] = useState<LocalUser | null>(initialUser);
   const [profile, setProfile] = useState<Profile | null>(initialProfile);
   const [loading, setLoading] = useState(!initialUser);
-  const userRef = useRef<User | null>(initialUser);
-  const initialUserRef = useRef<User | null>(initialUser);
+  const pathname = usePathname();
+
+  const syncUser = useCallback(async (active: () => boolean = () => true) => {
+    try {
+      const response = await fetch("/api/me", { cache: "no-store" });
+      if (!response.ok) {
+        if (active()) {
+          setUser(null);
+          setProfile(null);
+        }
+        return;
+      }
+      const data = (await response.json()) as {
+        user: LocalUser | null;
+        profile: Profile | null;
+      };
+      if (!active()) return;
+      setUser(data.user);
+      setProfile(data.profile);
+    } finally {
+      if (active()) setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const supabase = createClient();
     let active = true;
 
-    const syncUser = async (nextUser: User | null) => {
-      userRef.current = nextUser;
-
-      if (!active) return;
-
-      setUser(nextUser);
-
-      if (!nextUser) {
-        setProfile(null);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const { data: nextProfile, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", nextUser.id)
-          .maybeSingle();
-
-        if (!active) return;
-
-        if (error) {
-          setProfile(null);
-        } else {
-          setProfile((nextProfile as Profile | null) ?? null);
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void supabase.auth
-      .getUser()
-      .then((result: UserResponse) => {
-        const nextUser = result.data.user ?? null;
-
-        if (!nextUser && initialUserRef.current) {
-          if (!active) return;
-          setLoading(false);
-          return;
-        }
-
-        void syncUser(nextUser);
-      })
-      .catch(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      if (event === "INITIAL_SESSION" && !session?.user && initialUserRef.current) {
-        if (!active) return;
-        setLoading(false);
-        return;
-      }
-
-      void syncUser(session?.user ?? null);
-    });
-
-    const handleProfileUpdated = () => {
-      void syncUser(userRef.current);
-    };
-
-    window.addEventListener("profile-updated", handleProfileUpdated);
+    void syncUser(() => active);
 
     return () => {
       active = false;
-      subscription.unsubscribe();
-      window.removeEventListener("profile-updated", handleProfileUpdated);
     };
-  }, []);
+  }, [pathname, syncUser]);
+
+  useEffect(() => {
+    const handleUserChanged = () => {
+      setLoading(true);
+      void syncUser();
+    };
+
+    window.addEventListener("auth-changed", handleUserChanged);
+    window.addEventListener("profile-updated", handleUserChanged);
+    return () => {
+      window.removeEventListener("auth-changed", handleUserChanged);
+      window.removeEventListener("profile-updated", handleUserChanged);
+    };
+  }, [syncUser]);
 
   return { user, profile, loading };
 }

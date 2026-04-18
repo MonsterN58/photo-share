@@ -34,11 +34,12 @@ export function DynamicWatermark({
   title,
   className = "absolute inset-0 z-[2] overflow-hidden pointer-events-none select-none",
 }: DynamicWatermarkProps) {
-  const [sessionId, setSessionId] = useState("------");
+  const [sessionId] = useState(() =>
+    typeof window === "undefined" ? "------" : getSessionWatermarkId()
+  );
   const [timestamp, setTimestamp] = useState(() => formatTimestamp(new Date()));
 
   useEffect(() => {
-    setSessionId(getSessionWatermarkId());
     const timer = window.setInterval(() => {
       setTimestamp(formatTimestamp(new Date()));
     }, 30000);

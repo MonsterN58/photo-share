@@ -1,18 +1,14 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { UploadForm } from "@/components/upload/upload-form";
 import { Upload } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth-adapter";
 
 export default async function UploadPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">

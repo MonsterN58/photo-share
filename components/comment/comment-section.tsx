@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { useUser } from "@/hooks/use-user";
 import { useRealtimeComments } from "@/hooks/use-realtime-comments";
-import { addComment, deleteComment, likeComment } from "@/lib/actions/comment";
+import { addComment, deleteComment, likeComment, unlikeComment } from "@/lib/actions/comment";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,14 +12,14 @@ import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Comment } from "@/types";
 import type { Profile } from "@/types";
-import type { User } from "@supabase/supabase-js";
+import type { LocalUser } from "@/types";
 import { toast } from "sonner";
 import Link from "next/link";
 
 interface CommentSectionProps {
   photoId: string;
   initialComments: Comment[];
-  initialUser?: User | null;
+  initialUser?: LocalUser | null;
   initialProfile?: Profile | null;
 }
 
@@ -62,6 +62,7 @@ export function CommentSection({
         username: profile?.username || user.user_metadata?.username || "我",
         avatar_url: profile?.avatar_url || null,
         bio: profile?.bio || null,
+        cover_url: profile?.cover_url || null,
         created_at: profile?.created_at || new Date().toISOString(),
       },
     });
@@ -139,19 +140,7 @@ export function CommentSection({
             photoId={photoId}
             userId={user?.id}
             onReply={() => setReplyTo(comment.id)}
-            onOptimisticLike={(id) =>
-              updateOptimistic(id, {
-                likes: (comments.find((current) => current.id === id)?.likes ?? 0) + 1,
-              })
-            }
-            onOptimisticUnlike={(id) =>
-              updateOptimistic(id, {
-                likes: Math.max(
-                  0,
-                  (comments.find((current) => current.id === id)?.likes ?? 1) - 1
-                ),
-              })
-            }
+
           />
         ))}
       </div>
@@ -171,19 +160,17 @@ function CommentItem({
   photoId,
   userId,
   onReply,
-  onOptimisticLike,
-  onOptimisticUnlike,
 }: {
   comment: Comment;
   replies: Comment[];
   photoId: string;
   userId?: string;
   onReply: () => void;
-  onOptimisticLike: (commentId: string) => void;
-  onOptimisticUnlike: (commentId: string) => void;
 }) {
   const [isPending, startTransition] = useTransition();
   const isOptimistic = comment.id.startsWith("temp-");
+  const [localLikes, setLocalLikes] = useState(comment.likes);
+  const [localLiked, setLocalLiked] = useState(false);
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -193,14 +180,29 @@ function CommentItem({
   };
 
   const handleLike = () => {
-    onOptimisticLike(comment.id);
-    startTransition(async () => {
-      const result = await likeComment(comment.id, photoId);
-      if (result.error) {
-        onOptimisticUnlike(comment.id);
-        toast.error(result.error);
-      }
-    });
+    if (localLiked) {
+      setLocalLikes((v) => Math.max(0, v - 1));
+      setLocalLiked(false);
+      startTransition(async () => {
+        const result = await unlikeComment(comment.id, photoId);
+        if (result.error) {
+          setLocalLikes((v) => v + 1);
+          setLocalLiked(true);
+          toast.error(result.error);
+        }
+      });
+    } else {
+      setLocalLikes((v) => v + 1);
+      setLocalLiked(true);
+      startTransition(async () => {
+        const result = await likeComment(comment.id, photoId);
+        if (result.error) {
+          setLocalLikes((v) => Math.max(0, v - 1));
+          setLocalLiked(false);
+          toast.error(result.error);
+        }
+      });
+    }
   };
 
   return (
@@ -237,10 +239,10 @@ function CommentItem({
               type="button"
               onClick={handleLike}
               disabled={isPending || isOptimistic}
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
+              className={`flex items-center gap-1 text-xs transition-colors disabled:opacity-50 ${localLiked ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}
             >
-              <Heart className="h-3.5 w-3.5" />
-              {comment.likes > 0 && <span>{comment.likes}</span>}
+              <Heart className={`h-3.5 w-3.5 ${localLiked ? "fill-current" : ""}`} />
+              {localLikes > 0 && <span>{localLikes}</span>}
             </button>
             <button
               type="button"

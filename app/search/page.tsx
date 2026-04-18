@@ -1,8 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
 import { getSearchPhotos } from "@/lib/data";
 import { MasonryGrid } from "@/components/photo/masonry-grid";
 import { FilterBar } from "@/components/photo/filter-bar";
 import { SearchBar } from "@/components/photo/search-bar";
+import { getCurrentUser } from "@/lib/auth-adapter";
+import { attachLikeState } from "@/lib/db-read";
 import type { Photo } from "@/types";
 import { Suspense } from "react";
 import { Search } from "lucide-react";
@@ -26,26 +27,8 @@ export default async function SearchPage({ searchParams }: SearchProps) {
     // Use cached query for public photos
     photos = await getSearchPhotos(query, sort);
 
-    // Merge per-user like state
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user && photos.length > 0) {
-      const { data: likedRows } = await supabase
-        .from("photo_likes")
-        .select("photo_id")
-        .eq("user_id", user.id)
-        .in(
-          "photo_id",
-          photos.map((photo) => photo.id)
-        );
-      const likedIds = new Set(likedRows?.map((row) => row.photo_id as string) || []);
-      photos = photos.map((photo) => ({
-        ...photo,
-        has_liked: likedIds.has(photo.id),
-      })) as Photo[];
-    }
+    const user = await getCurrentUser();
+    photos = (await attachLikeState(photos, user?.id)) as Photo[];
   }
 
   return (

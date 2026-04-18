@@ -21,7 +21,7 @@ export function FilterBar() {
   };
 
   return (
-    <div className="flex items-center bg-gray-50 rounded-full p-0.5 gap-0.5">
+    <div className="flex items-center bg-gray-100 rounded-full p-0.5 gap-0.5">
       {SORT_OPTIONS.map((opt) => (
         <Button
           key={opt.value}
@@ -30,7 +30,7 @@ export function FilterBar() {
           onClick={() => handleSort(opt.value)}
           className={
             currentSort === opt.value
-              ? "text-xs h-8 rounded-full shadow-sm"
+              ? "text-xs h-8 rounded-full shadow-sm ring-2 ring-gray-900/20 ring-offset-1 ring-offset-gray-100 font-semibold"
               : "text-xs h-8 rounded-full text-gray-500 hover:text-gray-900 hover:bg-white"
           }
         >

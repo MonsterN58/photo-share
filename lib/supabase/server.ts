@@ -18,7 +18,6 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Server Component 中无法设置 cookie，忽略
           }
         },
       },

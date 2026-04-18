@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
+import Link from "next/link";
 import { CommentSection } from "@/components/comment/comment-section";
 import { ProtectedPhotoViewer } from "@/components/photo/protected-photo-viewer";
 import { ShareButton } from "@/components/photo/share-button";
@@ -9,9 +9,16 @@ import { siteConfig } from "@/lib/site-config";
 import { Eye, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import type { Photo, Comment, Profile } from "@/types";
 import { PhotoDetailClient } from "./client";
 import type { Metadata } from "next";
+import { getCurrentUser } from "@/lib/auth-adapter";
+import {
+  getCommentsForPhotoForMode,
+  getLikedPhotoIdsForMode,
+  getPhotoByIdForMode,
+  getPhotoMetadataForMode,
+  getProfileForMode,
+} from "@/lib/db-read";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -19,12 +26,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("photos")
-    .select("title, description")
-    .eq("id", id)
-    .single();
+  const data = await getPhotoMetadataForMode(id);
 
   return {
     title: data?.title ? `${data.title} - NKU印象` : "NKU印象",
@@ -34,50 +36,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PhotoDetailPage({ params }: Props) {
   const { id } = await params;
-  const supabase = await createClient();
+  const typedPhoto = await getPhotoByIdForMode(id);
 
-  const { data: photo } = await supabase
-    .from("photos")
-    .select("*, profiles(*)")
-    .eq("id", id)
-    .single();
+  if (!typedPhoto) notFound();
 
-  if (!photo) notFound();
-
-  const typedPhoto = photo as Photo;
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  let hasLiked = false;
-  let initialProfile: Profile | null = null;
-  if (user) {
-    const [{ data: likeRow }, { data: profile }] = await Promise.all([
-      supabase
-        .from("photo_likes")
-        .select("photo_id")
-        .eq("photo_id", id)
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    ]);
-    hasLiked = !!likeRow;
-    initialProfile = (profile as Profile | null) ?? null;
-  }
-
-  const { data: comments } = await supabase
-    .from("comments")
-    .select("*, profiles(*)")
-    .eq("photo_id", id)
-    .order("created_at", { ascending: true });
-
-  const typedComments = (comments as Comment[]) || [];
+  const user = await getCurrentUser();
+  const hasLiked = user ? (await getLikedPhotoIdsForMode(user.id, [id])).has(id) : false;
+  const initialProfile = user ? await getProfileForMode(user.id) : null;
+  const typedComments = await getCommentsForPhotoForMode(id);
 
   return (
     <>
       <PhotoDetailClient photoId={id} />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-          {/* 左侧图片区域 */}
           <div className="lg:col-span-3">
             <ProtectedPhotoViewer
               url={typedPhoto.url}
@@ -88,11 +60,12 @@ export default async function PhotoDetailPage({ params }: Props) {
             />
           </div>
 
-          {/* 右侧信息区域 */}
-          <div className="lg:col-span-2 space-y-5">
-            {/* 作者 */}
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 overflow-hidden">
+          <div className="lg:col-span-2 space-y-5 min-w-0">
+            <Link
+              href={`/user/${typedPhoto.profiles?.id || typedPhoto.user_id}`}
+              className="flex items-center gap-3 group w-fit"
+            >
+              <Avatar className="h-10 w-10 overflow-hidden ring-2 ring-transparent group-hover:ring-gray-200 transition-all">
                 {typedPhoto.profiles?.avatar_url ? (
                   <AvatarImage
                     src={typedPhoto.profiles.avatar_url}
@@ -104,7 +77,7 @@ export default async function PhotoDetailPage({ params }: Props) {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                   {typedPhoto.profiles?.username || "匿名用户"}
                 </p>
                 <p className="text-xs text-gray-400">
@@ -114,21 +87,19 @@ export default async function PhotoDetailPage({ params }: Props) {
                   })}
                 </p>
               </div>
-            </div>
+            </Link>
 
-            {/* 标题描述 */}
             <div className="space-y-2">
               <h1 className="text-xl font-bold text-gray-900 leading-snug">
                 {typedPhoto.title}
               </h1>
               {typedPhoto.description && (
-                <p className="text-sm text-gray-500 leading-relaxed">
+                <p className="text-sm text-gray-500 leading-relaxed break-words">
                   {typedPhoto.description}
                 </p>
               )}
             </div>
 
-            {/* 数据统计 */}
             <div className="flex items-center gap-5 text-sm text-gray-400 border-y border-gray-100 py-4">
               <div className="flex items-center gap-1.5">
                 <Eye className="h-4 w-4" />
@@ -140,7 +111,6 @@ export default async function PhotoDetailPage({ params }: Props) {
               </div>
             </div>
 
-            {/* 操作按钮 */}
             <div className="flex flex-wrap gap-2">
               <PhotoActions
                 photoId={id}
@@ -154,7 +124,6 @@ export default async function PhotoDetailPage({ params }: Props) {
 
             <div className="border-t border-gray-100" />
 
-            {/* 评论 */}
             <CommentSection
               photoId={id}
               initialComments={typedComments}

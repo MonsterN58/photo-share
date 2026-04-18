@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { CaptureGuard } from "@/components/layout/capture-guard";
@@ -11,32 +11,30 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 export const metadata: Metadata = {
   metadataBase: new URL("https://nku-photo.vercel.app"),
   title: {
-    default: "NKU印象 · 发现校园瞬间",
-    template: "%s · NKU印象",
+    default: "南开印象 · 发现校园瞬间",
+    template: "%s · 南开印象",
   },
   description: "记录与分享南开大学校园印象，探索每一个美好瞬间",
   keywords: ["南开大学", "NKU", "校园摄影", "校园印象", "照片分享"],
-  authors: [{ name: "NKU印象" }],
+  authors: [{ name: "南开印象" }],
   icons: {
     icon: [
-      { url: "/nku-logo.png", type: "image/png", sizes: "512x512" },
-      { url: "/nku-logo.png", type: "image/png", sizes: "192x192" },
-      { url: "/nku-logo.png", type: "image/png", sizes: "32x32" },
+      { url: "/site-icon.svg", type: "image/svg+xml" },
     ],
-    shortcut: "/nku-logo.png",
+    shortcut: "/site-icon.svg",
     apple: { url: "/nku-logo.png", type: "image/png", sizes: "180x180" },
   },
   openGraph: {
     type: "website",
     locale: "zh_CN",
-    siteName: "NKU印象",
-    title: "NKU印象 · 发现校园瞬间",
+    siteName: "南开印象",
+    title: "南开印象 · 发现校园瞬间",
     description: "记录与分享南开大学校园印象，探索每一个美好瞬间",
-    images: [{ url: "/nku-logo.png", width: 512, height: 512, alt: "NKU印象" }],
+    images: [{ url: "/nku-logo.png", width: 512, height: 512, alt: "南开印象" }],
   },
   twitter: {
     card: "summary",
-    title: "NKU印象 · 发现校园瞬间",
+    title: "南开印象 · 发现校园瞬间",
     description: "记录与分享南开大学校园印象",
     images: ["/nku-logo.png"],
   },
@@ -50,6 +48,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
