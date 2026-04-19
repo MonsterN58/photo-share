@@ -16,7 +16,6 @@ import {
   getCommentsForPhotoForMode,
   getLikedPhotoIdsForMode,
   getPhotoByIdForMode,
-  getPhotoMetadataForMode,
   getProfileForMode,
 } from "@/lib/db-read";
 
@@ -26,7 +25,17 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const data = await getPhotoMetadataForMode(id);
+  const [data, user] = await Promise.all([
+    getPhotoByIdForMode(id),
+    getCurrentUser(),
+  ]);
+
+  if (!data || (!data.is_public && user?.id !== data.user_id)) {
+    return {
+      title: "NKU印象",
+      description: "记录与分享南开校园印象",
+    };
+  }
 
   return {
     title: data?.title ? `${data.title} - NKU印象` : "NKU印象",
@@ -36,11 +45,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PhotoDetailPage({ params }: Props) {
   const { id } = await params;
-  const typedPhoto = await getPhotoByIdForMode(id);
+  const [typedPhoto, user] = await Promise.all([
+    getPhotoByIdForMode(id),
+    getCurrentUser(),
+  ]);
 
   if (!typedPhoto) notFound();
+  if (!typedPhoto.is_public && user?.id !== typedPhoto.user_id) notFound();
 
-  const user = await getCurrentUser();
   const hasLiked = user ? (await getLikedPhotoIdsForMode(user.id, [id])).has(id) : false;
   const initialProfile = user ? await getProfileForMode(user.id) : null;
   const typedComments = await getCommentsForPhotoForMode(id);

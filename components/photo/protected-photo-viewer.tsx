@@ -18,6 +18,14 @@ interface ProtectedPhotoViewerProps {
   antiScreenshotEnabled: boolean;
 }
 
+type FullscreenCapableElement = HTMLDivElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+
+type FullscreenCapableDocument = Document & {
+  webkitExitFullscreen?: () => Promise<void> | void;
+};
+
 const MIN_SCALE = 1;
 const MAX_SCALE = 5;
 
@@ -37,7 +45,8 @@ export function ProtectedPhotoViewer({
   // Zoom / pan state
   const [scale, setScale] = useState(1);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
-  const isPanning = useRef(false);
+  const isPanningRef = useRef(false);
+  const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
   const lastTranslate = useRef({ x: 0, y: 0 });
   const lastPinchDist = useRef(0);
@@ -56,6 +65,11 @@ export function ProtectedPhotoViewer({
   const resetZoom = useCallback(() => {
     setScale(1);
     setTranslate({ x: 0, y: 0 });
+  }, []);
+
+  const updatePanning = useCallback((nextValue: boolean) => {
+    isPanningRef.current = nextValue;
+    setIsPanning(nextValue);
   }, []);
 
   // Clamp translate so image doesn't go out of bounds, with a small elastic margin
@@ -139,7 +153,7 @@ export function ProtectedPhotoViewer({
     const handleMouseDown = (e: MouseEvent) => {
       if (scale <= 1) return;
       if ((e.target as HTMLElement).closest("button")) return;
-      isPanning.current = true;
+      updatePanning(true);
       panStart.current = { x: e.clientX, y: e.clientY };
       lastTranslate.current = { ...translate };
       container.style.cursor = "grabbing";
@@ -147,7 +161,7 @@ export function ProtectedPhotoViewer({
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isPanning.current) return;
+      if (!isPanningRef.current) return;
       const dx = e.clientX - panStart.current.x;
       const dy = e.clientY - panStart.current.y;
       const newT = clampTranslate(lastTranslate.current.x + dx, lastTranslate.current.y + dy, scale);
@@ -155,7 +169,7 @@ export function ProtectedPhotoViewer({
     };
 
     const handleMouseUp = () => {
-      isPanning.current = false;
+      updatePanning(false);
       container.style.cursor = scale > 1 ? "grab" : "";
     };
 
@@ -167,7 +181,7 @@ export function ProtectedPhotoViewer({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [scale, translate, clampTranslate]);
+  }, [scale, translate, clampTranslate, updatePanning]);
 
   // Desktop double-click to toggle zoom (zoom to click point)
   useEffect(() => {
@@ -217,7 +231,7 @@ export function ProtectedPhotoViewer({
         lastTranslate.current = { ...translate };
         e.preventDefault();
       } else if (e.touches.length === 1 && scale > 1) {
-        isPanning.current = true;
+        updatePanning(true);
         panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         lastTranslate.current = { ...translate };
       }
@@ -250,7 +264,7 @@ export function ProtectedPhotoViewer({
           setTranslate(newT);
         }
         if (isFullscreen) scheduleHideControls();
-      } else if (e.touches.length === 1 && isPanning.current) {
+      } else if (e.touches.length === 1 && isPanningRef.current) {
         e.preventDefault();
         const dx = e.touches[0].clientX - panStart.current.x;
         const dy = e.touches[0].clientY - panStart.current.y;
@@ -260,7 +274,7 @@ export function ProtectedPhotoViewer({
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      isPanning.current = false;
+      updatePanning(false);
       lastPinchDist.current = 0;
       // Snap back if pinch-to-zoom ended near 1x
       if (e.touches.length === 0 && scale > 1 && scale < 1.08) {
@@ -276,7 +290,7 @@ export function ProtectedPhotoViewer({
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [scale, translate, clampTranslate, resetZoom, isFullscreen, scheduleHideControls]);
+  }, [scale, translate, clampTranslate, resetZoom, isFullscreen, scheduleHideControls, updatePanning]);
 
   // Double-tap to toggle zoom on mobile (zoom to tap point)
   const lastTap = useRef(0);
@@ -316,13 +330,15 @@ export function ProtectedPhotoViewer({
   const handleEnterFullscreen = async () => {
     const el = containerRef.current;
     if (!el) return;
-    const rfs = el.requestFullscreen || (el as any).webkitRequestFullscreen;
-    if (!rfs) {
+    const requestFullscreen =
+      el.requestFullscreen?.bind(el) ??
+      (el as FullscreenCapableElement).webkitRequestFullscreen?.bind(el);
+    if (!requestFullscreen) {
       toast.error("当前浏览器不支持全屏查看");
       return;
     }
     try {
-      await rfs.call(el);
+      await requestFullscreen();
       scheduleHideControls();
     } catch {
       toast.error("进入全屏失败");
@@ -330,10 +346,12 @@ export function ProtectedPhotoViewer({
   };
 
   const handleExitFullscreen = async () => {
-    const exitFn = document.exitFullscreen || (document as any).webkitExitFullscreen;
-    if (!exitFn) return;
+    const exitFullscreen =
+      document.exitFullscreen?.bind(document) ??
+      (document as FullscreenCapableDocument).webkitExitFullscreen?.bind(document);
+    if (!exitFullscreen) return;
     try {
-      await exitFn.call(document);
+      await exitFullscreen();
     } catch {
       toast.error("退出全屏失败");
     }
@@ -353,8 +371,8 @@ export function ProtectedPhotoViewer({
         ref={imageWrapperRef}
         style={{
           transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-          transition: isPanning.current ? "none" : "transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-          ...(isFullscreen ? {} : !isZoomed ? { paddingBottom: `${aspectRatio}%` } : { paddingBottom: `${aspectRatio}%` }),
+          transition: isPanning ? "none" : "transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+          ...(isFullscreen ? {} : { paddingBottom: `${aspectRatio}%` }),
         }}
         className={`relative ${isFullscreen ? "h-full w-full" : ""}`}
       >

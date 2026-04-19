@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useRef, useCallback } from "react";
 import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -234,10 +235,13 @@ export function UploadForm() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {files.map((f, i) => (
             <div key={i} className="relative group rounded-lg overflow-hidden bg-gray-100 aspect-square">
-              <img
+              <Image
                 src={f.preview}
-                alt=""
-                className="w-full h-full object-cover"
+                alt={f.file.name || "预览图"}
+                fill
+                unoptimized
+                sizes="(max-width: 640px) 50vw, 33vw"
+                className="object-cover"
               />
               <button
                 onClick={(e) => {

@@ -16,10 +16,6 @@ export function PhotoDetailClient({ photoId }: { photoId: string }) {
 
   // Save the referrer path on mount so we can go back
   useEffect(() => {
-    // Store current scroll position of the previous page
-    const handleBeforeUnload = () => {
-      sessionStorage.setItem(SCROLL_STORAGE_KEY, String(window.scrollY));
-    };
     // Restore scroll on popstate (back navigation)
     const restoreScroll = () => {
       const saved = sessionStorage.getItem(SCROLL_STORAGE_KEY);

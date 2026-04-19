@@ -31,6 +31,28 @@ type CommentRow = Omit<Comment, "profiles"> & {
   profile_created_at: string | null;
 };
 
+type PortfolioRow = Omit<Portfolio, "is_public" | "profiles" | "albums"> & {
+  is_public: number;
+  profile_id: string | null;
+  profile_username: string | null;
+  profile_avatar_url: string | null;
+  profile_bio: string | null;
+  profile_created_at: string | null;
+  album_name: string | null;
+  album_description: string | null;
+  photo_count: number | null;
+  total_views: number | null;
+  total_likes: number | null;
+};
+
+type NotificationRow = Omit<Notification, "is_read" | "from_profile"> & {
+  is_read: number;
+  from_username: string | null;
+  from_avatar_url: string | null;
+  photo_title: string | null;
+  comment_content: string | null;
+};
+
 function getDbPath() {
   const configuredPath = process.env.LOCAL_DATABASE_PATH?.trim() || DEFAULT_DB_PATH;
   const storageMode = process.env.STORAGE_MODE?.trim().toLowerCase() || "gitee";
@@ -744,7 +766,7 @@ export function getPublicPortfolios(page = 0) {
        order by p.created_at desc
        limit ? offset ?`
     )
-    .all(PAGE_SIZE, page * PAGE_SIZE) as any[];
+    .all(PAGE_SIZE, page * PAGE_SIZE) as PortfolioRow[];
   return rows.map(toPortfolio);
 }
 
@@ -769,7 +791,7 @@ export function getPortfoliosForUser(userId: string) {
        where p.user_id = ?
        order by p.created_at desc`
     )
-    .all(userId) as any[];
+    .all(userId) as PortfolioRow[];
   return rows.map(toPortfolio);
 }
 
@@ -791,7 +813,7 @@ export function getPortfolioByAlbum(albumId: string) {
     .get(albumId) as { id: string } | undefined;
 }
 
-function toPortfolio(row: any): Portfolio {
+function toPortfolio(row: PortfolioRow): Portfolio {
   return {
     id: row.id,
     user_id: row.user_id,
@@ -804,11 +826,11 @@ function toPortfolio(row: any): Portfolio {
     profiles: row.profile_id
       ? {
           id: row.profile_id,
-          username: row.profile_username,
+          username: row.profile_username ?? "未知用户",
           avatar_url: row.profile_avatar_url,
           bio: row.profile_bio,
           cover_url: null,
-          created_at: row.profile_created_at,
+          created_at: row.profile_created_at ?? row.created_at,
         }
       : undefined,
     albums: row.album_name
@@ -872,7 +894,7 @@ export function getNotificationsForUser(userId: string, unreadOnly = false) {
        order by n.created_at desc
        limit 50`
     )
-    .all(userId) as any[];
+    .all(userId) as NotificationRow[];
 }
 
 export function getUnreadNotificationCount(userId: string) {
@@ -933,9 +955,20 @@ export function getPublicPhotosForUser(userId: string, page?: number) {
   return rows.map(toPhoto);
 }
 
+export function getPublicPhotosForAlbum(albumId: string, page?: number) {
+  const sql =
+    typeof page === "number"
+      ? `${photoSelectSql()} where p.album_id = ? and ${PUBLIC_PHOTO_CONDITION} order by p.created_at desc limit ? offset ?`
+      : `${photoSelectSql()} where p.album_id = ? and ${PUBLIC_PHOTO_CONDITION} order by p.created_at desc`;
+  const rows = (typeof page === "number"
+    ? getDb().prepare(sql).all(albumId, PAGE_SIZE, page * PAGE_SIZE)
+    : getDb().prepare(sql).all(albumId)) as PhotoRow[];
+  return rows.map(toPhoto);
+}
+
 export function updateProfile(userId: string, updates: { username?: string; bio?: string | null; cover_url?: string | null }) {
   const sets: string[] = [];
-  const values: any[] = [];
+  const values: Array<string | null> = [];
   if (updates.username !== undefined) {
     sets.push("username = ?");
     values.push(updates.username);

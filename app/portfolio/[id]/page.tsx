@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
-import { attachLikeState, getPortfolioByIdForMode } from "@/lib/db-read";
+import {
+  attachLikeState,
+  getPortfolioByIdForMode,
+  getPublicPhotosForAlbumForMode,
+} from "@/lib/db-read";
 import { getCurrentUser } from "@/lib/auth-adapter";
 import { PortfolioDetail } from "./client";
 import type { Photo } from "@/types";
@@ -10,17 +14,15 @@ interface PortfolioPageProps {
 
 export default async function PortfolioPage({ params }: PortfolioPageProps) {
   const { id } = await params;
-  const portfolio = await getPortfolioByIdForMode(id);
-
-  if (!portfolio) notFound();
-
-  // Get photos in the album
-  const { getUserPhotosForMode } = await import("@/lib/db-read");
-  const [allPhotos, user] = await Promise.all([
-    getUserPhotosForMode(portfolio.user_id),
+  const [portfolio, user] = await Promise.all([
+    getPortfolioByIdForMode(id),
     getCurrentUser(),
   ]);
-  const albumPhotos = allPhotos.filter((p) => p.album_id === portfolio.album_id && p.is_public);
+
+  if (!portfolio) notFound();
+  if (!portfolio.is_public && user?.id !== portfolio.user_id) notFound();
+
+  const albumPhotos = await getPublicPhotosForAlbumForMode(portfolio.album_id);
   const photos = (await attachLikeState(albumPhotos, user?.id)) as Photo[];
 
   return (

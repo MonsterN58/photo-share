@@ -14,6 +14,7 @@ import {
   getPortfoliosForUser as getLocalPortfoliosForUser,
   getProfile as getLocalProfile,
   getPublicPhotos as getLocalPublicPhotos,
+  getPublicPhotosForAlbum as getLocalPublicPhotosForAlbum,
   getPublicPhotosForUser as getLocalPublicPhotosForUser,
   getPublicPortfolios as getLocalPublicPortfolios,
   getUnreadNotificationCount as getLocalUnreadNotificationCount,
@@ -27,6 +28,21 @@ const PAGE_SIZE = 30;
 let publicSupabase: ReturnType<typeof createPublicSupabaseClient> | null = null;
 
 type ProfileIdRow = { id: string };
+
+type LocalNotificationRow = {
+  id: string;
+  user_id: string;
+  type: "like" | "comment";
+  from_user_id: string;
+  photo_id: string;
+  comment_id: string | null;
+  is_read: number;
+  created_at: string;
+  from_username: string | null;
+  from_avatar_url: string | null;
+  photo_title: string | null;
+  comment_content: string | null;
+};
 
 function getPublicSupabase() {
   if (!publicSupabase) {
@@ -295,8 +311,8 @@ export async function getPortfolioByIdForMode(id: string) {
 
 export async function getNotificationsForMode(userId: string, unreadOnly = false) {
   if (getDatabaseMode() === "local") {
-    const rows = getLocalNotificationsForUser(userId, unreadOnly);
-    return rows.map((row: any) => ({
+    const rows = getLocalNotificationsForUser(userId, unreadOnly) as LocalNotificationRow[];
+    return rows.map((row) => ({
       id: row.id,
       user_id: row.user_id,
       type: row.type as "like" | "comment",
@@ -386,5 +402,26 @@ export async function getPublicPhotosForUserForMode(userId: string, page?: numbe
 
   const { data } = await qb;
 
+  return ((data as Photo[]) || []).map(normalizePhotoAsset);
+}
+
+export async function getPublicPhotosForAlbumForMode(albumId: string, page?: number) {
+  if (getDatabaseMode() === "local") {
+    return getLocalPublicPhotosForAlbum(albumId, page);
+  }
+
+  const supabase = await createSupabaseClient();
+  let qb = supabase
+    .from("photos")
+    .select("*, profiles(*), albums(*)")
+    .eq("album_id", albumId)
+    .eq("is_public", true)
+    .order("created_at", { ascending: false });
+
+  if (typeof page === "number") {
+    qb = qb.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+  }
+
+  const { data } = await qb;
   return ((data as Photo[]) || []).map(normalizePhotoAsset);
 }

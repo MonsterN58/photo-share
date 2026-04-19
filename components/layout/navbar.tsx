@@ -297,7 +297,16 @@ export function Navbar() {
                                   className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
                                 >
                                   {notif.from_profile?.avatar_url ? (
-                                    <img src={notif.from_profile.avatar_url} alt={notif.from_profile?.username || ""} className="h-8 w-8 rounded-full object-cover flex-shrink-0" />
+                                    <Avatar className="h-8 w-8 flex-shrink-0 overflow-hidden">
+                                      <AvatarImage
+                                        src={notif.from_profile.avatar_url}
+                                        alt={notif.from_profile?.username || "头像"}
+                                        className="h-full w-full object-cover"
+                                      />
+                                      <AvatarFallback className="bg-gray-200 text-xs font-bold text-gray-500">
+                                        {(notif.from_profile?.username || "?")[0].toUpperCase()}
+                                      </AvatarFallback>
+                                    </Avatar>
                                   ) : (
                                     <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 text-xs font-bold text-gray-500">
                                       {(notif.from_profile?.username || "?")[0].toUpperCase()}

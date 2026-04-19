@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { Check, Link as LinkIcon, Loader2, QrCode, Share2 } from "lucide-react";
 import { toast } from "sonner";
@@ -43,21 +43,37 @@ export function ShareButton({
 
   const shareUrl = shortUrl || longUrl;
 
-  useEffect(() => {
-    if (!open) return;
-
-    // Fetch short URL
+  const fetchShortUrl = useCallback(async () => {
     setLoadingShort(true);
-    fetch("/api/shorten", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ photoId }),
-    })
-      .then((r) => r.json())
-      .then((data) => { if (data.url) setShortUrl(data.url); })
-      .catch(() => {})
-      .finally(() => setLoadingShort(false));
-  }, [open, photoId]);
+    try {
+      const response = await fetch("/api/shorten", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoId }),
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = (await response.json().catch(() => null)) as { url?: string } | null;
+      if (data?.url) {
+        setShortUrl(data.url);
+      }
+    } finally {
+      setLoadingShort(false);
+    }
+  }, [photoId]);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      setOpen(nextOpen);
+      if (nextOpen && !shortUrl && !loadingShort) {
+        void fetchShortUrl();
+      }
+    },
+    [fetchShortUrl, loadingShort, shortUrl]
+  );
 
   useEffect(() => {
     if (open && canvasRef.current) {
@@ -77,7 +93,7 @@ export function ShareButton({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button
