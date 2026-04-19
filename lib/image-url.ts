@@ -9,6 +9,13 @@ export function shouldBypassImageOptimization(src: string | null | undefined) {
     return true;
   }
 
+  // Local user uploads are already compressed by the browser before upload.
+  // Serving them directly avoids unnecessary server-side re-encoding overhead.
+  if (src.startsWith("/uploads/")) {
+    return true;
+  }
+
+  // Other /public assets (logos, icons) can use Next.js optimization.
   if (src.startsWith("/")) {
     return false;
   }

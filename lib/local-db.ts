@@ -332,9 +332,17 @@ function photoSelectSql() {
 }
 
 function orderBy(sort: string) {
-  return sort === "popular"
-    ? "order by p.likes desc, p.views desc, p.created_at desc"
-    : "order by p.created_at desc";
+  if (sort !== "popular") return "order by p.created_at desc";
+  // Time-decayed popularity: score = (likes*10 + views) / (age_hours + 2)
+  // Prevents old highly-liked content from permanently dominating the feed.
+  // Adding 2 to age ensures very new posts aren't artificially inflated,
+  // and prevents division by zero for posts created in the same second.
+  return (
+    "order by " +
+    "(p.likes * 10.0 + p.views) / " +
+    "max(1.0, (cast(strftime('%s', 'now') as real) - cast(strftime('%s', p.created_at) as real)) / 3600.0 + 2.0) " +
+    "desc, p.created_at desc"
+  );
 }
 
 export function createUser(email: string, passwordHash: string, username: string) {

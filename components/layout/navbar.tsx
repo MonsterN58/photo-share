@@ -32,13 +32,15 @@ export function Navbar() {
   const navRef = useRef<HTMLDivElement>(null);
   const notifCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const notifLoadingRef = useRef(false);
   const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   const fetchUnreadNotifs = useCallback(async () => {
-    if (notifPopupLoading) return;
+    if (notifLoadingRef.current) return;
+    notifLoadingRef.current = true;
     setNotifPopupLoading(true);
     try {
       const res = await fetch("/api/notifications?unread_only=true&limit=5", { cache: "no-store" });
@@ -47,9 +49,10 @@ export function Navbar() {
         setUnreadNotifs(data.notifications || []);
       }
     } finally {
+      notifLoadingRef.current = false;
       setNotifPopupLoading(false);
     }
-  }, [notifPopupLoading]);
+  }, []); // stable: loading guard moved to ref to prevent callback churn
 
   const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
@@ -155,8 +158,20 @@ export function Navbar() {
     }
   }, [router]);
 
+  const handleHeaderPointerLeave = useCallback(() => {
+    // Fallback: whenever the pointer leaves the entire header (including when
+    // the user menu portal draws the pointer outside the header DOM subtree),
+    // start a close timer. The per-element onPointerEnter handlers cancel it.
+    closeNotifPopupSoon();
+    closeUserMenuSoon();
+  }, [closeNotifPopupSoon, closeUserMenuSoon]);
+
   return (
-    <header ref={headerRef} className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-gray-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-gray-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+      onPointerLeave={handleHeaderPointerLeave}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Brand */}
@@ -248,8 +263,8 @@ export function Navbar() {
                 {/* Notification bell */}
                 <div
                   className="relative"
-                  onMouseEnter={openNotifPopup}
-                  onMouseLeave={closeNotifPopupSoon}
+                  onPointerEnter={openNotifPopup}
+                  onPointerLeave={closeNotifPopupSoon}
                 >
                   <button
                     onClick={() => router.push("/notifications")}
@@ -267,8 +282,8 @@ export function Navbar() {
                       <div className="hidden md:block absolute right-0 top-full h-2 w-80" />
                       <div
                         className="hidden md:block absolute right-0 top-full mt-1.5 w-80 rounded-xl border border-gray-200 bg-white shadow-lg z-50 overflow-hidden"
-                        onMouseEnter={openNotifPopup}
-                        onMouseLeave={closeNotifPopupSoon}
+                        onPointerEnter={openNotifPopup}
+                        onPointerLeave={closeNotifPopupSoon}
                       >
                         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
                           <span className="text-sm font-semibold text-gray-900">未读通知</span>
@@ -357,8 +372,8 @@ export function Navbar() {
                 {/* Desktop-only: avatar with dropdown */}
                 <div
                 className="hidden md:block relative"
-                onMouseEnter={openUserMenu}
-                onMouseLeave={closeUserMenuSoon}
+                onPointerEnter={openUserMenu}
+                onPointerLeave={closeUserMenuSoon}
               >
                 <DropdownMenu
                   open={userMenuOpen}
@@ -404,8 +419,8 @@ export function Navbar() {
                   align="end"
                   sideOffset={2}
                   className="w-52 rounded-xl shadow-lg border-gray-100"
-                  onMouseEnter={openUserMenu}
-                  onMouseLeave={closeUserMenuSoon}
+                  onPointerEnter={openUserMenu}
+                  onPointerLeave={closeUserMenuSoon}
                 >
                   <div className="px-3 py-2.5">
                     <p className="text-sm font-semibold text-gray-900 truncate">
